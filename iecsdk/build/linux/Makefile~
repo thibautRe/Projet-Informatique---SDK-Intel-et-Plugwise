@@ -1,0 +1,785 @@
+#/**
+#*** INTEL CONFIDENTIAL
+#*** 
+#*** Copyright (October 2008) (October 2008) Intel Corporation All Rights Reserved. 
+#*** The source code contained or described herein and all documents related to the
+#*** source code ("Material") are owned by Intel Corporation or its suppliers or 
+#*** licensors. Title to the Material remains with Intel Corporation or its 
+#*** suppliers and licensors. The Material contains trade secrets and proprietary 
+#*** and confidential information of Intel or its suppliers and licensors. 
+#*** The Material is protected by worldwide copyright and trade secret laws 
+#*** and treaty provisions. No part of the Material may be used, copied, 
+#*** reproduced, modified, published, uploaded, posted, transmitted, distributed,
+#*** or disclosed in any way without Intel's prior express written permission.
+#***
+#*** No license under any patent, copyright, trade secret or other intellectual
+#*** property right is granted to or conferred upon you by disclosure or delivery
+#*** of the Materials, either expressly, by implication, inducement, estoppel or
+#*** otherwise. Any license under such intellectual property rights must be 
+#*** express and approved by Intel in writing.
+#**/
+
+# @      @@@@@  @    @ @    @ @   @
+# @        @    @@   @ @    @  @ @
+# @        @    @ @  @ @    @   @
+# @        @    @ @  @ @    @   @
+# @        @    @  @ @ @    @   @
+# @        @    @   @@ @    @  @ @
+# @@@@@@ @@@@@  @    @  @@@@  @   @
+
+#-----------------------------------------------------------------------------
+# IEC SDK directory structure and useful defines.
+#-----------------------------------------------------------------------------
+IECSDK_ROOT=/home/thibaut/Intel_SDK/iesdk
+IECSDK_BIN_ROOT=$(IECSDK_ROOT)/bin
+IECSDK_DEP_ROOT=$(IECSDK_ROOT)/dep
+IECSDK_SRC_ROOT=$(IECSDK_ROOT)/src
+IECSDK_DEP_UTILS=$(IECSDK_ROOT)/utils
+
+IECSDK_CORE_API=$(IECSDK_SRC_ROOT)/core_api
+IECSDK_HELPER_API=$(IECSDK_SRC_ROOT)/helper_api
+IECSDK_SAMPLES=$(IECSDK_SRC_ROOT)/samples
+IECSDK_CORE_API_PORTING=$(IECSDK_CORE_API)/porting_test_applets
+IECSDK_CORE_API_UNIT_TESTS=$(IECSDK_CORE_API)/unit_tests/core_api_unit_tests
+IECSDK_CORE_API_BENCHMARK=$(IECSDK_CORE_API)/benchmark
+IECSDK_COMPANION=$(IECSDK_SRC_ROOT)/companion_applications
+IECSDK_ESRV=$(IECSDK_SRC_ROOT)/energy_server
+
+#-----------------------------------------------------------------------------
+# IEC SDK configuration.
+#-----------------------------------------------------------------------------
+#IECSDK_VERSION=debug
+IECSDK_VERSION=release
+#IECSDK_ADDRESSING=32
+IECSDK_ADDRESSING=64
+
+#-----------------------------------------------------------------------------
+# IEC SDK JAVA directory structure.
+#-----------------------------------------------------------------------------
+ifeq ($(IECSDK_ADDRESSING), 32)
+	JAVA_PATH=/usr/java/jdk1.6.0_13/bin
+	JAVA_INCLUDE_PATH=/usr/java/jdk1.6.0_13/include
+	JAVA_LINUX_INCLUDE_PATH=/usr/java/jdk1.6.0_13/include/linux
+else
+	JAVA_PATH=/usr/java/jdk1.6.0_13/bin
+	JAVA_INCLUDE_PATH=/usr/java/jdk1.6.0_13/include
+	JAVA_LINUX_INCLUDE_PATH=/usr/java/jdk1.6.0_13/include/linux
+endif
+
+#-----------------------------------------------------------------------------
+# Ganglia* sources directory.  This is a dependency for sample pl2ganglia.
+# * Third-party trademarks are the property of their respective owners.
+#-----------------------------------------------------------------------------
+IECSDK_GANGLIA_ROOT=/home/jamel/instrumented_software/ganglia-3.1.7
+IECSDK_GANGLIA_INCLUDE=$(IECSDK_GANGLIA_ROOT)/include
+IECSDK_GANGLIA_GMETRIC=$(IECSDK_GANGLIA_ROOT)/gmetric
+IECSDK_GANGLIA_LIB=$(IECSDK_GANGLIA_ROOT)/lib
+
+#-----------------------------------------------------------------------------
+# IEC SDK tools.
+#-----------------------------------------------------------------------------
+IECSDK_CLEAR=/usr/bin/clear
+IECSDK_CC=/usr/bin/gcc
+IECSDK_CPP=/usr/bin/g++
+IECSDK_LD=/usr/bin/ld
+IECSDK_LDD=/usr/bin/ldd
+IECSDK_NM=/usr/bin/nm
+IECSDK_LN=/bin/ln
+IECSDK_LL=/bin/ls -al
+IECSDK_OBJDUMP=/usr/bin/objdump
+IECSDK_STRIP=/usr/bin/strip
+IECSDK_RM_F=/bin/rm -f
+IECSDK_CP=/bin/cp
+IECSDK_MV=/bin/mv
+IECSDK_MKDIR=/bin/mkdir -p
+IECSDK_TAR=/bin/tar -cvf
+IECSDK_GZIP=/bin/gzip
+IECSDK_CHAMOD=/bin/chmod
+IECSDK_MAKE=/usr/bin/make
+IECSDK_AR=/usr/bin/ar
+IECSDK_ECHO=/bin/echo
+IECSDK_GREP=/bin/grep
+IECSDK_JAVAC=$(JAVA_PATH)/javac
+IECSDK_JAVAH=$(JAVA_PATH)/javah
+
+#-----------------------------------------------------------------------------
+# IEC SDK build configuration.
+#-----------------------------------------------------------------------------
+IECSDK_SO_MAJOR_VERSION=1
+IECSDK_SO_MINOR_VERSION=0
+ifeq ($(IECSDK_ADDRESSING), 32)
+	IECSDK_COMPILER_ADDRESSING=-m32
+	ifeq ($(IECSDK_VERSION), debug)
+		IECSDK_COMPILER_DEBUG_INFO=-g -D_DEBUG -D__PL_DEBUG__
+		IECSDK_COMPILER_OPTIMIZATION=-O0 -msse
+	else
+		IECSDK_COMPILER_DEBUG_INFO=
+		IECSDK_COMPILER_OPTIMIZATION=-O2 -msse
+	endif
+else
+	IECSDK_COMPILER_ADDRESSING=-m64
+	ifeq ($(IECSDK_VERSION), debug)
+		IECSDK_COMPILER_DEBUG_INFO=-g -D_DEBUG -D__PL_DEBUG__
+		IECSDK_COMPILER_OPTIMIZATION=-O0 -msse
+	else
+		IECSDK_COMPILER_DEBUG_INFO=
+		IECSDK_COMPILER_OPTIMIZATION=-O2 -msse
+	endif
+endif
+
+#-----------------------------------------------------------------------------
+# IEC SDK useful names.
+#-----------------------------------------------------------------------------
+IECSDK_NAME=productivity_link
+IECSDK_LIB=lib$(IECSDK_NAME)
+IECSDK_OBJECT=$(IECSDK_NAME).o
+IECSDK_STATIC_LIB=lib$(IECSDK_NAME).a
+IECSDK_SO=lib$(IECSDK_NAME).so
+IECSDK_SO_MAJOR=$(IECSDK_SO).$(IECSDK_SO_MAJOR_VERSION)
+IECSDK_SO_FULL=$(IECSDK_SO_MAJOR).$(IECSDK_SO_MINOR_VERSION)
+IECSDK_JNI_OBJECT=productivity_link_jni.o
+IECSDK_JNI_SO=libproductivity_link_jni.so
+IECSDK_JNI_SO_MAJOR=$(IECSDK_JNI_SO).$(IECSDK_SO_MAJOR_VERSION)
+IECSDK_JNI_SO_FULL=$(IECSDK_JNI_SO_MAJOR).$(IECSDK_SO_MINOR_VERSION)
+
+#-----------------------------------------------------------------------------
+# API build configuration.
+#-----------------------------------------------------------------------------
+IECSDK_API_CONFIG=\
+	-D__PL_LINUX__ \
+	-D__PL_GENERATE_INI__ \
+	-D__PL_GENERATE_INI_VERSION_TAGGING__ \
+	-D__PL_GENERATE_INI_BUILD_TAGGING__ \
+	-D__PL_GENERATE_INI_DATE_AND_TIME_TAGGING__ \
+	-D__PL_BLOCKING_COUNTER_FILE_LOCK__ \
+	-D__PL_EXTRA_INPUT_CHECKS__
+
+IECSDK_CFLAGS=\
+	$(IECSDK_API_CONFIG) \
+	$(IECSDK_COMPILER_ADDRESSING) \
+	$(IECSDK_COMPILER_DEBUG_INFO) \
+	$(IECSDK_COMPILER_OPTIMIZATION) \
+	-Wall \
+	-fPIC \
+	-std=gnu99 \
+	-D_SVID_SOURCE \
+	-D_REENTRANT \
+	-D_LIBC_REENTRANT \
+	-pthread
+
+IECSDK_LDFLAGS=\
+	-lpthread \
+	-luuid \
+	-ldl
+
+#-----------------------------------------------------------------------------
+# IECSDK targets.
+#-----------------------------------------------------------------------------
+IECSDK_TARGET_ALL=all
+IECSDK_TARGET_PRODUCTIVITY_LINK_OBJECT=o
+IECSDK_TARGET_PRODUCTIVITY_LINK_STATIC_LIB=a
+IECSDK_TARGET_PRODUCTIVITY_LINK_DYNAMIC_LIB=so
+IECSDK_TARGET_PRODUCTIVITY_LINK_JAVA_LIB=j
+IECSDK_TARGET_PRODUCTIVITY_LINK=productivity_link
+IECSDK_TARGET_PRODUCTIVITY_LINK_HELPER=productivity_link_helper
+IECSDK_TARGET_PRODUCTIVITY_LINK_AGENT=pl_agent
+IECSDK_TARGET_CONSUMER=consumer
+IECSDK_TARGET_LOGGER=logger
+IECSDK_TARGET_PRODUCER=producer
+IECSDK_TARGET_ESRV_CLIENT=esrv_client
+IECSDK_TARGET_CEE=cee
+IECSDK_TARGET_CORE_API_UNIT_TESTS=unit_tests
+IECSDK_TARGET_CORE_API_BENCHMAK=benchmark
+IECSDK_TARGET_CORE_API_BENCHMAK_BYPASS=benchmark_bypass
+IECSDK_TARGET_SAMPLE_JAVA_CALLING=java_sample
+IECSDK_TARGET_SAMPLE_MEMINFO=linux_mem_info
+IECSDK_TARGET_SAMPLE_VMSTAT=linux_vmstat_info
+IECSDK_TARGET_SAMPLE_DISKSTAT=linux_diskstat_info
+IECSDK_TARGET_SAMPLE_LOAD=linux_cpu_and_loadavg_info
+IECSDK_TARGET_SAMPLE_ENERGY=energy
+IECSDK_TARGET_SAMPLE_PL2GANGLIA=pl2ganglia
+IECSDK_TARGET_COMPANION_APPLICATIONS_PL_CSV_LOGGER=pl_csv_logger
+IECSDK_CLEAN=clean
+IECSDK_HELP=help
+
+#-----------------------------------------------------------------------------
+# Display available targets.
+#-----------------------------------------------------------------------------
+$(IECSDK_HELP):
+	@$(IECSDK_CLEAR)
+	@$(IECSDK_ECHO) ""
+	@$(IECSDK_ECHO) "Makefile Targets:"
+	@$(IECSDK_ECHO) "-----------------"
+	@$(IECSDK_ECHO) ""
+	@$(IECSDK_ECHO) "all:........................Build All Targets."
+	@$(IECSDK_ECHO) "o:..........................Build PL Object."
+	@$(IECSDK_ECHO) "a:..........................Build PL Static Library."
+	@$(IECSDK_ECHO) "so:.........................Build PL Shared Object."
+	@$(IECSDK_ECHO) "j:..........................Build PL JNI Shared Object."
+	@$(IECSDK_ECHO) "productivity_link:..........Build Dummy Application To Build PL."
+	@$(IECSDK_ECHO) "productivity_link_helper:...Build Dummy Application To Build PL Helper."
+	@$(IECSDK_ECHO) "pl_agent....................Build PL Agent."
+	@$(IECSDK_ECHO) "consumer:...................Build Porting Testing Applet's Consumer."
+	@$(IECSDK_ECHO) "logger:.....................Build Porting Testing Applet's Logger."
+	@$(IECSDK_ECHO) "producer:...................Build Porting Testing Applet's Producer."
+	@$(IECSDK_ECHO) "esrv_client:................Build ESRV Client Sample."
+	@$(IECSDK_ECHO) "cee:........................Build Cluster Energy Efficiency (cee) Sample."
+	@$(IECSDK_ECHO) "unit_tests:.................Build PL API Unit Tests." 
+	@$(IECSDK_ECHO) "benchmark:..................Build PL Benchmark (Not Available In 64bit Mode)."
+	@$(IECSDK_ECHO) "benchmark_bypass:...........Build PL Benchmark Bypassed (Not Available In 64bit Mode)."
+	@$(IECSDK_ECHO) "java_sample:................Build Java Sample Calling JNI Shared Object -- Depends On Target (j)."
+	@$(IECSDK_ECHO) "linux_mem_info:.............Build Sample /proc/meminfo Data Collector."
+	@$(IECSDK_ECHO) "linux_vmstat_info:..........Build Sample /proc/vmstat Data Collector."
+	@$(IECSDK_ECHO) "linux_diskstat_info:....... Build Sample /proc/diskstats Data Collector."
+	@$(IECSDK_ECHO) "linux_cpu_and_loadavg_info:.Build Sample /proc/loadavg, /proc/stats and cpu usage (computed) Data Collector."
+	@$(IECSDK_ECHO) "energy:.....................Build Sample energy."
+	@$(IECSDK_ECHO) "pl2ganglia:.................Build Sample pl2ganglia."
+	@$(IECSDK_ECHO) "pl_csv_logger:..............Build The CSV Logger Companion Application."
+	@$(IECSDK_ECHO) ""
+	@$(IECSDK_ECHO) "clean:......................Delete All Build Files."
+	@$(IECSDK_ECHO) "help:.......................Print This Help Message."
+	@$(IECSDK_ECHO) ""
+	@$(IECSDK_ECHO) "Notes:"
+	@$(IECSDK_ECHO) "------"
+	@$(IECSDK_ECHO) "   Use The IECSDK_VERSION Symbol To Build Debug (debug) Or Release (release) Binaries."
+	@$(IECSDK_ECHO) "   Use The IECSDK_ADDRESSING Symbol To Build 32bit (32) Or 64bit (64) Binaries."
+	@$(IECSDK_ECHO) "   By Default, IECSDK_VERSION=debug and IECSDK_ADDRESSING=32 Are Used."
+	@$(IECSDK_ECHO) ""
+
+#-----------------------------------------------------------------------------
+# clean all targets.
+#-----------------------------------------------------------------------------
+$(IECSDK_CLEAN):
+	@$(IECSDK_CLEAR)
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# clean all targets."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_RM_F) $(IECSDK_OBJECT)
+	@$(IECSDK_RM_F) $(IECSDK_STATIC_LIB)
+	@$(IECSDK_RM_F) $(IECSDK_SO)
+	@$(IECSDK_RM_F) $(IECSDK_SO_MAJOR)
+	@$(IECSDK_RM_F) $(IECSDK_SO_FULL)
+	@$(IECSDK_RM_F) $(IECSDK_JNI_SO)
+	@$(IECSDK_RM_F) $(IECSDK_JNI_SO_MAJOR)
+	@$(IECSDK_RM_F) $(IECSDK_JNI_SO_FULL)
+	@$(IECSDK_RM_F) ProductivityLink*
+	@$(IECSDK_RM_F) productivity_link_jni.o
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_PRODUCTIVITY_LINK) 
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_PRODUCTIVITY_LINK_HELPER)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_CONSUMER)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_LOGGER)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_PRODUCER)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_ESRV_CLIENT)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_CEE)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_CORE_API_UNIT_TESTS)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_CORE_API_BENCHMAK)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_CORE_API_BENCHMAK_BYPASS)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_SAMPLE_JAVA_CALLING)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_SAMPLE_MEMINFO)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_SAMPLE_VMSTAT)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_SAMPLE_DISKSTAT)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_SAMPLE_LOAD)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_SAMPLE_ENERGY)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_SAMPLE_PL2GANGLIA)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_COMPANION_APPLICATIONS_PL_CSV_LOGGER)
+	@$(IECSDK_RM_F) $(IECSDK_TARGET_PRODUCTIVITY_LINK_AGENT)
+
+#------------------------- build rules ---------------------------------------
+
+#-----------------------------------------------------------------------------
+# build all targets.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_ALL):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# build all targets."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_MAKE) $(IECSDK_TARGET_PRODUCTIVITY_LINK_OBJECT)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_PRODUCTIVITY_LINK_STATIC_LIB)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_PRODUCTIVITY_LINK_DYNAMIC_LIB)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_PRODUCTIVITY_LINK_JAVA_LIB)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_PRODUCTIVITY_LINK)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_PRODUCTIVITY_LINK_HELPER)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_CONSUMER)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_LOGGER)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_PRODUCER)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_ESRV_CLIENT)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_CEE)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_CORE_API_UNIT_TESTS)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_CORE_API_BENCHMAK)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_CORE_API_BENCHMAK_BYPASS)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_SAMPLE_JAVA_CALLING)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_SAMPLE_MEMINFO)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_SAMPLE_VMSTAT)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_SAMPLE_DISKSTAT)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_SAMPLE_LOAD)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_SAMPLE_ENERGY)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_SAMPLE_PL2GANGLIA)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_COMPANION_APPLICATIONS_PL_CSV_LOGGER)
+	$(IECSDK_MAKE) $(IECSDK_TARGET_PRODUCTIVITY_LINK_AGENT)
+	$(IECSDK_LL)
+
+#-----------------------------------------------------------------------------
+# Build productivity link object file.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_PRODUCTIVITY_LINK_OBJECT):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build productivity link object file."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-c $(IECSDK_CORE_API)/productivity_link.c
+
+#-----------------------------------------------------------------------------
+# Build a static productivity link library.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_PRODUCTIVITY_LINK_STATIC_LIB):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build a static productivity link library."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_MAKE) \
+		$(IECSDK_TARGET_PRODUCTIVITY_LINK_OBJECT)
+	$(IECSDK_AR) \
+		rcs \
+		$(IECSDK_STATIC_LIB) \
+		$(IECSDK_OBJECT)
+
+#-----------------------------------------------------------------------------
+# Build the pl_agent.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_PRODUCTIVITY_LINK_AGENT):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the pl_agent."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-D__PL_AGENT__ \
+		-D__PL_DYNAMIC_TABLE_ALLOCATION__ \
+		-D__PL_DYNAMIC_COUNTERS_ALLOCATION__ \
+		-D_BSD_SOURCE \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_HELPER_API) \
+		$(IECSDK_CORE_API)/productivity_link_agent.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		$(IECSDK_HELPER_API)/productivity_link_helper.c \
+		-o $(IECSDK_TARGET_PRODUCTIVITY_LINK_AGENT) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build a dynamic link productivity link library.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_PRODUCTIVITY_LINK_DYNAMIC_LIB):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build a dynamic link productivity link library."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_MAKE) \
+		$(IECSDK_TARGET_PRODUCTIVITY_LINK_OBJECT)
+	$(IECSDK_CC) \
+		-shared \
+		-Wl,-soname,$(IECSDK_SO_FULL) \
+		-o $(IECSDK_SO_FULL) \
+		$(IECSDK_OBJECT) \
+		$(IECSDK_LDFLAGS)
+	$(IECSDK_LN) \
+		-sf \
+		$(IECSDK_SO_FULL) \
+		$(IECSDK_SO)
+	$(IECSDK_LN) \
+		-sf \
+		$(IECSDK_SO_FULL) \
+		$(IECSDK_SO_MAJOR)
+
+#-----------------------------------------------------------------------------
+# Build a jni synamic library to be used by instrumented Java applications.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_PRODUCTIVITY_LINK_JAVA_LIB):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build a jni synamic library to be used by instrumented Java applications."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_JAVAC) \
+		-d . \
+		-s . \
+		$(IECSDK_CORE_API)/interfaces/ProductivityLink.java
+	$(IECSDK_JAVAH) \
+		-d . \
+		-classpath . \
+		-jni ProductivityLink
+	$(IECSDK_CC) \
+		-I. \
+		-I$(JAVA_INCLUDE_PATH) \
+		-I$(JAVA_LINUX_INCLUDE_PATH) \
+		-I$(IECSDK_CORE_API) \
+		$(IECSDK_CFLAGS) \
+		-D__PL_JNI_EXPORTS__ \
+		-D__PL_LITTLE_ENDIAN__ \
+		-c $(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_JNI_OBJECT)
+	$(IECSDK_CC) \
+		-I. \
+		-I$(JAVA_INCLUDE_PATH) \
+		-I$(JAVA_LINUX_INCLUDE_PATH) \
+		-I$(IECSDK_CORE_API) \
+		$(IECSDK_CFLAGS) \
+		-D__PL_JNI_EXPORTS__ \
+		-D__PL_LITTLE_ENDIAN__ \
+		$(IECSDK_LDFLAGS) \
+		-shared \
+		-Wl,-soname,$(IECSDK_JNI_SO_FULL) \
+		-o $(IECSDK_JNI_SO_FULL) \
+		$(IECSDK_JNI_OBJECT)
+	$(IECSDK_LN) \
+		-sf \
+		$(IECSDK_JNI_SO_FULL) \
+		$(IECSDK_JNI_SO)
+	$(IECSDK_LN) \
+		-sf \
+		$(IECSDK_JNI_SO_FULL) \
+		$(IECSDK_JNI_SO_MAJOR)
+
+#-----------------------------------------------------------------------------
+# Build dummy code to test core api files compilation.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_PRODUCTIVITY_LINK):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build dummy code to test core api files compilation."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		$(IECSDK_CORE_API)/dummy_main.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_PRODUCTIVITY_LINK) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build dummy code to test helper api files compilation.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_PRODUCTIVITY_LINK_HELPER):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build dummy code to test helper api files compilation."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		$(IECSDK_HELPER_API)/dummy_main.c \
+		$(IECSDK_HELPER_API)/productivity_link_helper.c \
+		-o $(IECSDK_TARGET_PRODUCTIVITY_LINK_HELPER) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build a java sample calling the API using the JNI interface and JNI 
+# dynamic library.
+# Note: you may need to target 64-bit if your JVM / System is 64-bit.
+# Note: you may need to set your library path with export LD_LIBRARY_PATH=.
+# Note: with older compilers you may have to use export MALLOC_CHECK_=0.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_SAMPLE_JAVA_CALLING): $(IECSDK_TARGET_PRODUCTIVITY_LINK_JAVA_LIB)
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build a java sample calling the API using the JNI interface and JNI"
+	@$(IECSDK_ECHO) "# dynamic library."
+	@$(IECSDK_ECHO) "# Note: you may need to target 64-bit if your JVM / System is 64-bit."
+	@$(IECSDK_ECHO) "# Note: you may need to set your library path with export LD_LIBRARY_PATH=."
+	@$(IECSDK_ECHO) "# Note: with older compilers you may have to use export MALLOC_CHECK_=0."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_JAVAC) -d . -s . $(IECSDK_SAMPLES)/java_calling_sample/ProductivityLinkDemo.java
+
+#-----------------------------------------------------------------------------
+# Build the 'consumer' porting test applet.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_CONSUMER):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the 'consumer' porting test applet."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_CORE_API_PORTING)/common \
+		$(IECSDK_CORE_API_PORTING)/consumer/consumer.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_CONSUMER) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build the 'logger' porting test applet.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_LOGGER):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the 'logger' porting test applet."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_CORE_API_PORTING)/common \
+		$(IECSDK_CORE_API_PORTING)/logger/logger.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_LOGGER) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build the 'producer' porting test applet.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_PRODUCER):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the 'producer' porting test applet."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_CORE_API_PORTING)/common \
+		$(IECSDK_CORE_API_PORTING)/producer/producer.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_PRODUCER) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build the ESRV Client sample.
+# Note: you can use the CUMULATIVE_EE symbol to activate the cumulative 
+#       energy efficiency reporting.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_ESRV_CLIENT):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the ESRV Client sample."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_HELPER_API) \
+		-I$(IECSDK_ESRV) \
+		$(IECSDK_SAMPLES)/esrv_client/esrv_client.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		$(IECSDK_HELPER_API)/productivity_link_helper.c \
+		-o $(IECSDK_TARGET_ESRV_CLIENT) \
+		$(IECSDK_LDFLAGS) \
+		-lm
+
+#-----------------------------------------------------------------------------
+# Build the cluster energy efficiency (cee) sample.
+# Note: you can use the following symbols to modify cee's behavior
+#    __ESRV_ON_EACH_NODE__
+#    __ESRV_ON_AGGREGATION_NODE__
+#    __LOAD_BALANCING__
+#    __LIVE_MONITORING__
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_CEE):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the cluster energy efficiency (cee) sample."
+	@$(IECSDK_ECHO) "# Note: you can use the following symbols to modify cee's behavior"
+	@$(IECSDK_ECHO) "#    __ESRV_ON_EACH_NODE__"
+	@$(IECSDK_ECHO) "#    __ESRV_ON_AGGREGATION_NODE__"
+	@$(IECSDK_ECHO) "#    __LOAD_BALANCING__"
+	@$(IECSDK_ECHO) "#    __LIVE_MONITORING__"
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-D__PL_DYNAMIC_TABLE_ALLOCATION__ \
+		-D__CEE_ESRV_ON_EACH_NODE__ \
+		-D__CEE_LOAD_BALANCING__ \
+		-D__CEE_LIVE_MONITORING__ \
+		-D__CEE_FAVOR_TIMER_PRECISION_OVER_POWER_DRAW__ \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_HELPER_API) \
+		-I$(IECSDK_ESRV) \
+		$(IECSDK_SAMPLES)/cluster_energy_efficiency/cee.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		$(IECSDK_HELPER_API)/productivity_link_helper.c \
+		-o $(IECSDK_TARGET_CEE) \
+		$(IECSDK_LDFLAGS) \
+		-lm
+
+#-----------------------------------------------------------------------------
+# Build the API unit tests.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_CORE_API_UNIT_TESTS):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the API unit tests."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-D__PL_UNIT_TESTS__ \
+		-D__PL_EXTRA_INPUT_TESTS__ \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_CORE_API_UNIT_TESTS) \
+		-I$(IECSDK_HELPER_API) \
+		$(IECSDK_CORE_API_UNIT_TESTS)/unit_tests.c \
+		$(IECSDK_CORE_API_UNIT_TESTS)/unit_tests_framework.c \
+		$(IECSDK_CORE_API_UNIT_TESTS)/unit_tests_tools.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		$(IECSDK_HELPER_API)/productivity_link_helper.c \
+		-o $(IECSDK_TARGET_CORE_API_UNIT_TESTS) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build the API benchmark.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_CORE_API_BENCHMAK):
+ifeq ($(IECSDK_ADDRESSING), 32)
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the API benchmark."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_CORE_API_BENCHMARK) \
+		$(IECSDK_CORE_API_BENCHMARK)/benchmark.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_CORE_API_BENCHMAK) \
+		$(IECSDK_LDFLAGS)
+else
+	@$(IECSDK_ECHO) "Benchmark Is Not Available In 64bit Mode."
+endif
+
+#-----------------------------------------------------------------------------
+# Build the API bypass benchmark.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_CORE_API_BENCHMAK_BYPASS):
+ifeq ($(IECSDK_ADDRESSING), 32)
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the API bypass benchmark."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-D__PL_BYPASS_ \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_CORE_API_BENCHMARK) \
+		$(IECSDK_CORE_API_BENCHMARK)/benchmark.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_CORE_API_BENCHMAK_BYPASS) \
+		$(IECSDK_LDFLAGS)
+else
+	@$(IECSDK_ECHO) "Benchmark Is Not Available In 64bit Mode."
+endif
+
+#-----------------------------------------------------------------------------
+# Build the PL CSV logger.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_COMPANION_APPLICATIONS_PL_CSV_LOGGER):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the PL CSV logger."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_HELPER_API) \
+		-I$(IECSDK_COMPANION)/pl_csv_logger \
+		$(IECSDK_COMPANION)/pl_csv_logger/pl_csv_logger.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		$(IECSDK_HELPER_API)/productivity_link_helper.c \
+		-o $(IECSDK_TARGET_COMPANION_APPLICATIONS_PL_CSV_LOGGER) \
+		$(IECSDK_LDFLAGS) \
+		-lm
+
+#-----------------------------------------------------------------------------
+# Build the /proc/meminfo data collector sample.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_SAMPLE_MEMINFO):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the /proc/meminfo data collector sample."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		$(IECSDK_SAMPLES)/linux_system_infos/linux_mem_info.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_SAMPLE_MEMINFO) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build the /proc/vmstat data collector sample.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_SAMPLE_VMSTAT):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the /proc/vmstat data collector sample."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		$(IECSDK_SAMPLES)/linux_system_infos/linux_vmstat_info.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_SAMPLE_VMSTAT) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build the /proc/diskstats data collector sample.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_SAMPLE_DISKSTAT):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the /proc/diskstats data collector sample."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		$(IECSDK_SAMPLES)/linux_system_infos/linux_diskstat_info.c \
+		$(IECSDK_CORE_API)/productivity_link.c -o \
+		$(IECSDK_TARGET_SAMPLE_DISKSTAT) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build the /proc/loadavg, /proc/stats and cpu usage (computed) data collector
+# sample.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_SAMPLE_LOAD):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the /proc/loadavg, /proc/stats and cpu usage (computed) data collector"
+	@$(IECSDK_ECHO) "# sample."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		$(IECSDK_SAMPLES)/linux_system_infos/linux_cpu_and_loadavg_info.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		-o $(IECSDK_TARGET_SAMPLE_LOAD) \
+		$(IECSDK_LDFLAGS)
+
+#-----------------------------------------------------------------------------
+# Build the 'energy' sample.
+# Note:
+#    Be sure to have esrv in your PATH and the reader support library in
+#    in your LD_LIBRARY_PATH variable.
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_SAMPLE_ENERGY):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the 'energy' sample."
+	@$(IECSDK_ECHO) "# Note:"
+	@$(IECSDK_ECHO) "#    Be sure to have esrv in your PATH and the reader support library in"
+	@$(IECSDK_ECHO) "#    in your LD_LIBRARY_PATH variable."
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_HELPER_API) \
+		-I$(IECSDK_ESRV) \
+		-I$(IECSDK_SAMPLES)/energy \
+		$(IECSDK_SAMPLES)/energy/energy.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		$(IECSDK_HELPER_API)/productivity_link_helper.c \
+		-o $(IECSDK_TARGET_SAMPLE_ENERGY) \
+		$(IECSDK_LDFLAGS) \
+		-lm
+
+#-----------------------------------------------------------------------------
+# Build the 'pl2ganglia' sample.
+# Note:
+#    Be sure to have Ganglia installed, configured and working
+#-----------------------------------------------------------------------------
+$(IECSDK_TARGET_SAMPLE_PL2GANGLIA):
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	@$(IECSDK_ECHO) "# Build the 'pl2ganglia' sample."
+	@$(IECSDK_ECHO) "# Note:"
+	@$(IECSDK_ECHO) "#    Be sure to have Ganglia installed, configured and working"
+	@$(IECSDK_ECHO) "#-----------------------------------------------------------------------------"
+	$(IECSDK_CC) \
+		$(IECSDK_CFLAGS) \
+		-I$(IECSDK_CORE_API) \
+		-I$(IECSDK_HELPER_API) \
+		-I$(IECSDK_ESRV) \
+		-I$(IECSDK_SAMPLES)/pl2ganglia \
+		-I$(IECSDK_GANGLIA_INCLUDE) \
+		-I$(IECSDK_GANGLIA_GMETRIC) \
+		$(IECSDK_SAMPLES)/pl2ganglia/pl2ganglia.c \
+		$(IECSDK_CORE_API)/productivity_link.c \
+		$(IECSDK_HELPER_API)/productivity_link_helper.c \
+		-o $(IECSDK_TARGET_SAMPLE_PL2GANGLIA) \
+		-L$(IECSDK_GANGLIA_LIB) \
+		$(IECSDK_LDFLAGS) \
+		-lm \
+		-lganglia
