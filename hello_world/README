@@ -1,0 +1,12 @@
+--- HELLO WORLD ---
+
+Avant de faire un "make", il faut s'assurer que le répertoire <chemin_repertoire_installation>/build/linux/
+soit bien inclue dans la variable LD_LIBRARY_PATH.
+
+
+Après un make, un compteur du nom de "Hello_<UUID>" est exporté dans /opt/productivity_link/.
+Dedans il y a deux fichiers : pl_config.ini et World (le compteur).
+
+Avec pl_gui_monitor on affiche le petit diagramme représentant le compteur.
+
+Le nom du compteur est Hello et ici il mesure le nombre de World, c'est à dire 42 !
