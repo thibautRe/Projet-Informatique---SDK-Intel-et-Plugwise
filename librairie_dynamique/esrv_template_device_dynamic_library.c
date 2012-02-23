@@ -63,7 +63,7 @@ ESRV_API int init_device_extra_data(PESRV p) {
 	   );
     px = (void *)&data;
     
-    /** <h2> Initialisation du stick </h2>
+    /** <h2> Initialisation des structures de données où l'on stockera les informations </h2>
      * <ul>
      *  <li> Ajouter toutes les initialisations nécessaires pour utiliser Plugwise© ; </li>
      *  <li> Ajouter les données supplémentaires dans la définition de la structure DEVICE_DATA (cf. fichier .h) ; </li>
@@ -77,7 +77,7 @@ ESRV_API int init_device_extra_data(PESRV p) {
      * <strong> TODO: Ajouter le code d'initialisation du premier appel. </strong>
      */
     px->dummy = 0;
-    
+
     /** Mettre le nombre par défault de dispositif virtuel (1 par défault).
      * Si le dispositif a trois outils de mesure énergétique, qui partagent le même interface,
      * mettre la variable virtual_devices à 3.
@@ -191,15 +191,19 @@ ESRV_API int open_device(PESRV p, void *px) {
   }
   
   /**
-   * Cette fonction donne l'opportunité d'ouvrir le device.
+   * Cette fonction permet d'indiquer à pol le numéro de port du stick et de lui donner l'adresse MAC des "Circle" (?).
    * C'est aussi le bon endroit pour vérifier les initialisations du device.
-   * Cette fonction peut être la fonction principale si le device ne nécessite aucune
-   * configuration spécifique pour fonctionner.
    * 
    * <strong> TODO: Ajouter le code d'ouverture du "stick" à cet endroit. </strong>
    */
   ;
-  
+
+   // On indique le port série du stick Plugwise (par exemple /dev/ttyUSB0
+    system(`python ***/pol0.2_sources/pol.py -p <port>);
+
+    // On "allume le stick" avec la bonne adresse MAC
+    system(`python ***/pol0.2_sources/pol.py -o <macaddresse>);
+
   return(ESRV_SUCCESS);
  open_device_error:
   return(ESRV_FAILURE);
@@ -221,13 +225,13 @@ ESRV_API int close_device(PESRV p, void *px) {
   }
   
   /** 
-   * Cette fonction permet de fermer le device. <br>
-   * Cette fonction peut être une "stub function"
-   * si le device ne nécessite pas d'extinction particulière.
+   * Cette fonction permet d'éteindre le stick.
    *
    * <strong> TODO: Ajouter le code de fermeture du device ici. </strong>
    */
-  ;
+  
+  // On "allume le stick" avec la bonne adresse MAC
+    system(`python ***/pol0.2_sources/pol.py -f <macaddresse>);
   
   return(ESRV_SUCCESS);
  close_device_error:
@@ -235,54 +239,8 @@ ESRV_API int close_device(PESRV p, void *px) {
 }
 
 /**
- * \fn read_device_all_measurements(PESRV p, void *px, int vd)
- * \brief Lire toutes les mesures provenant du "stick".
- * \param[in,out] PESRV Pointeur vers une structure de données esrv.
- * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA
- * \param[in] L'ID du périphérique (device) virtuel. 
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
- */
-ESRV_API int read_device_all_measurements(PESRV p, void *px, int vd) {
-  
-  /** px peut être NULL s'il n'est pas nécessaire pour le device. */
-  if(!p) { 
-    goto read_device_power_error; 
-  }
-  
-  /**
-   * Vérification de l'ID  du "stick". <br>
-   * On pourrait supprimer cette étape puisque dans tous les cas on aura qu'un périphérique. <br>
-   *N.B. : L'ID des périphériques virtuels est par défault 1 (0 a un rôle spécifique).
-   */
-  if(
-     (vd <= 0) || 
-     (vd > p->device_data.virtual_devices)
-     ) { 
-    goto read_device_power_error; 
-  }
-  
-  /** Collecte toutes les mesures lues par le device ici et les retourne (cf. le code ci-dessous). <br>
-   * L'entier vd est l'ID tu périphérique virtuel donné par le serveur.
-   * vd peut être n'importe quel entier compri entre 0 et le nombre maximum
-   * de périphériques virtuels donné par la fonction init_device_extra_data.<br>
-   * Par défault, le vd max est égal à 0.
-   */
-  p->double_power = 0.0;
-  p->double_current = 0.0;
-  p->double_voltage = 0.0;
-  p->double_power_factor = 0.0;
-  p->double_voltage_frequency = 0.0;
-  p->double_current_frequency = 0.0;
-  
-  return(ESRV_SUCCESS);
- read_device_power_error:
-  return(ESRV_FAILURE);
-}
-
-/**
  * \fn read_device_power(PESRV p, void *px, int vd)
- * \brief Lit les données d'énergies données par le périphérique.
+ * \brief Lit les informations concernant la puissance données par le périphérique.
  * \param[in,out] PESRV Pointeur vers une structure de données esrv.
  * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
  * \param[in] int L'ID du périphérique virtuel (du "stick").
@@ -317,91 +275,12 @@ ESRV_API int read_device_power(PESRV p, void *px, int vd) {
    *
    * <strong> TODO : Il faut ajouter le code de lecture de la puissance du device ici. </strong>
    */
-  ;
+  
+  // On appel pol.py pour collecter la puissance
+  p->double_power = system(`python ***/pol0.2_sources/pol.py -w <macaddresse>);
   
   return(ESRV_SUCCESS);
  read_device_power_error:
-  return(ESRV_FAILURE);
-}
-
-/**
- * \fn read_device_energy(PESRV p, void *px, int vd, int s)
- * \brief Lire les données énergétiques du périphérique.
- * \param[in, out] PESRV Pointeur vers une structure de données esrv.
- * \param[in, out] void* Pointeur vers une structure de données DEVICE_DATA.
- * \param[in] int L'ID du périphérique virtuel.
- * \param[in] int La demande de service :
- * <ul>
- * <li> READ_DEVICE_ENERGY_INIT: demandé une fois, au démarrage du serveur ; </li>
- * <li> READ_DEVICE_ENERGY_START: demandé une fois au démarrage du serveur, juste après ; </li>
- * <li> READ_DEVICE_ENERGY_READ: demandé n'importe quand, pas de restriction ; </li>
- * <li> READ_DEVICE_ENERGY_STOP: demandé une fois, à l'arrêt du serveur ; </li>
- * <li> READ_DEVICE_ENERGY_RESET: demandé n'importe quand, pas de restriction. </li>
- * </ul>
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
- */
-ESRV_API int read_device_energy(PESRV p, void *px, int vd, int s) {
-  
-  /** px peut être NULL s'il n'est pas nécessaire pour le device. */
-  if(!p) { 
-    goto read_device_energy_error; 
-  }
-
-  /** 
-   * Collecte les informations énergétiques par le device et les retourne dans p->double_energy. <br>
-   * L'entier vd est l'ID du périphérique virtuel lié au serveur.
-   * vd peut être n'importe quel entier compri entre 0 et le nombre maximum
-   * de périphériques virtuels donné par la fonction init_device_extra_data.<br>
-   * Par défault, le vd max est égal à 0. <br>
-   * L'énergie doit être fournie en Joules.
-   */
-  
-  /** <h2> Différentes demandes : </h2> */
-  
-  switch(s) { 
-    
-  case READ_DEVICE_ENERGY_INIT:
-    /** - READ_DEVICE_ENERGY_INIT <br>
-     * <strong> TODO: process service request </strong>
-     */
-    break;
-    
-  case READ_DEVICE_ENERGY_START:
-    /** - READ_DEVICE_ENERGY_START <br>
-     * <strong> TODO: process service request </strong>
-     */
-    break;
-    
-  case READ_DEVICE_ENERGY_RESET:
-    /** - READ_DEVICE_ENERGY_RESET <br>
-     * <strong> TODO: process service request </strong>
-     */
-    break;
-    
-  case READ_DEVICE_ENERGY_STOP:
-    /** - READ_DEVICE_ENERGY_STOP <br>
-     * <strong> TODO: process service request </strong>
-     */
-    break;
-    
-  case READ_DEVICE_ENERGY_READ:
-    /** - READ_DEVICE_ENERGY_READ
-     * Attention à bien retourner la puissance en watts et l'énergie en joules.
-     * <strong> TODO: process service request </strong>
-     */ 
-    p->double_power = 0.0;
-    p->double_energy = 0.0;
-    break;
-    
-  default: /** - Demande inconnue <br> 
-	    * Service inconnu. */
-    assert(0); /** Ne doit jamais arriver. */
-    goto read_device_energy_error;
-  }
-  
-  return(ESRV_SUCCESS);
- read_device_energy_error:
   return(ESRV_FAILURE);
 }
 
@@ -443,230 +322,3 @@ ESRV_API int parse_device_option_string(PESRV p, void *pd) {
  parse_device_option_string_error:
   return(ESRV_FAILURE);
 }
-
-/** 
- * \fn read_device_current(PESRV p, void *px, int vd)
- * \brief Collecte les informations concernant le courant passant par l'adaptateur Plugwise© [OPTIONNEL].
- * \param[in,out] PESRV Pointeur vers une structure de données esrv.
- * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
- * \param[in] int L'ID du périphérique virtuel.
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
- */
-ESRV_API int read_device_current(PESRV p, void *px, int vd) {
-  
-  /** px peut être NULL s'il n'est pas nécessaire pour le device. */
-  if(!p) { 
-    goto read_device_current_error; 
-  }
-  
-  /**
-   * Vérification de l'ID  du "stick". <br>
-   * On pourrait supprimer cette étape puisque dans tous les cas on aura qu'un périphérique. <br>
-   *N.B. : L'ID des périphériques virtuels est par défault 1 (0 a un rôle spécifique).
-   */
-  if(
-     (vd <= 0) || 
-     (vd > p->device_data.virtual_devices)
-     ) { 
-    goto read_device_current_error; 
-  }
-  
-  /**
-   * Collecte les informations concernant le courant du périphérique virtuel via le serveur et les retourne
-   * dans p-> double_current. <br>
-   * L'entier vd est l'ID tu périphérique virtuel donné par le serveur.
-   * vd peut être n'importe quel entier compri entre 0 et le nombre maximum
-   * de périphériques virtuels donné par la fonction init_device_extra_data.<br>
-   * Par défault, le vd max est égal à 0. <br>
-   * Le courant doit être en Ampère. 
-   *
-   * <strong> TODO : Il faut ajouter le code de lecture du courant du device ici. </strong>
-   */
-  p->double_current = 0.0;
-  
-  return(ESRV_SUCCESS);
- read_device_current_error:
-  return(ESRV_FAILURE);
-}
-
-/**
- * \fn read_device_voltage(PERSV p, void *px, int vd)
- * \brief Collecte les informations concernant la tension aux bornes de l'appareil [OPTIONNEL].
- * \param[in,out] PESRV Pointeur vers une structure de données esrv.
- * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
- * \param[in] int L'ID du périphérique virtuel.
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
- */
-ESRV_API int read_device_voltage(PESRV p, void *px, int vd) {
-  
-  /**  px peut être NULL s'il n'est pas nécessaire pour le device. */
-  if(!p) { 
-    goto read_device_voltage_error; 
-  }
-  
-  /**
-   * Vérification de l'ID  du "stick". <br>
-   * On pourrait supprimer cette étape puisque dans tous les cas on aura qu'un périphérique. <br>
-   *N.B. : L'ID des périphériques virtuels est par défault 1 (0 a un rôle spécifique).
-   */
-  if(
-     (vd <= 0) || 
-     (vd > p->device_data.virtual_devices)
-     ) { 
-    goto read_device_voltage_error; 
-  }
-  
- /**
-   * Collecte les informations concernant la tension par le périphérique virtuel via le serveur et les retourne
-   * dans p-> double_voltage. <br>
-   * L'entier vd est l'ID tu périphérique virtuel donné par le serveur.
-   * vd peut être n'importe quel entier compri entre 0 et le nombre maximum
-   * de périphériques virtuels donné par la fonction init_device_extra_data.<br>
-   * Par défault, le vd max est égal à 0. <br>
-   * La tension doit être en Volts. 
-   *
-   * <strong> TODO : Il faut ajouter le code de lecture de la tension du device ici. </strong>
-   */
-	p->double_voltage = 0.0;
-	
-	return(ESRV_SUCCESS);
-read_device_voltage_error:
-	return(ESRV_FAILURE);
-}
-
-/**
- * \fn read_device_power_factor(PERSV p, void *px, int vd)
- * \brief Collecte les informations concernant le facteur de puissance de l'appareil.
- * \param[in,out] PESRV Pointeur vers une structure de données esrv.
- * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
- * \param[in] int L'ID du périphérique virtuel.
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
-*/
-ESRV_API int read_device_power_factor(PESRV p, void *px, int vd) {
-  
-  /**  px peut être NULL s'il n'est pas nécessaire pour le device. */
-  if(!p) { 
-    goto read_device_power_factor_error; 
-  }
-  
-  /**
-   * Vérification de l'ID  du "stick". <br>
-   * On pourrait supprimer cette étape puisque dans tous les cas on aura qu'un périphérique. <br>
-   *N.B. : L'ID des périphériques virtuels est par défault 1 (0 a un rôle spécifique).
-   */
-  if(
-     (vd <= 0) || 
-     (vd > p->device_data.virtual_devices)
-     ) { 
-    goto read_device_power_factor_error; 
-  }
-  
-  /** Collecte les informations concernant le facteur de puissance par le périphérique virtuel via le serveur et les retourne
-   * dans p->double_power_factor. <br>
-   * L'entier vd est l'ID tu périphérique virtuel donné par le serveur.
-   * vd peut être n'importe quel entier compri entre 0 et le nombre maximum
-   * de périphériques virtuels donné par la fonction init_device_extra_data.<br>
-   * Par défault, le vd max est égal à 0. <br>
-   * Le facteur de puissance n'a pas d'unité. 
-   *
-   * <strong> TODO : Il faut ajouter le code de lecture du facteur de puissance ici. </strong>
-   */
-  p->double_power_factor = 0.0;
-  
-  return(ESRV_SUCCESS);
- read_device_power_factor_error:
-  return(ESRV_FAILURE);
-}
-
-/**
- * \fn read_device_voltage_frequency(PERSV p, void *px, int vd)
- * \brief Collecte les informations concernant la fréquence de la tension aux bornes de l'appareil.
- * \param[in,out] PESRV Pointeur vers une structure de données esrv.
- * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
- * \param[in] int L'ID du périphérique virtuel.
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
-*/
-ESRV_API int read_device_voltage_frequency(PESRV p, void *px, int vd) {
-  
-  /**  px peut être NULL s'il n'est pas nécessaire pour le device. */
-  if(!p) { 
-    goto read_device_voltage_frequency_error; 
-  }
-  
- /**
-   * Vérification de l'ID  du "stick". <br>
-   * On pourrait supprimer cette étape puisque dans tous les cas on aura qu'un périphérique. <br>
-   *N.B. : L'ID des périphériques virtuels est par défault 1 (0 a un rôle spécifique).
-   */
-  if(
-     (vd <= 0) || 
-     (vd > p->device_data.virtual_devices)
-     ) { 
-    goto read_device_voltage_frequency_error; 
-  }
-  
-  /** Collecte les informations concernant la fréquence de la tension par le périphérique virtuel via le serveur et les retourne
-   * dans p->double_voltage_frequency. <br>
-   * L'entier vd est l'ID tu périphérique virtuel donné par le serveur.
-   * vd peut être n'importe quel entier compri entre 0 et le nombre maximum
-   * de périphériques virtuels donné par la fonction init_device_extra_data.<br>
-   * Par défault, le vd max est égal à 0. <br>
-   * La fréquence de la tension est donnée en Hz. 
-   *
-   * <strong> TODO : Il faut ajouter le code de lecture de la fréquence de la tension ici. </strong>
-   */
-  p->double_voltage_frequency = 0.0;
-  
-  return(ESRV_SUCCESS);
- read_device_voltage_frequency_error:
-  return(ESRV_FAILURE);
-}
-
-/** 
- * \fn int read_device_current_frequency(PERSV p, void *px, int vd)
- * \brief Collecte les informations concernant la fréquence du courant traversant l'appareil.
- * \param[in,out] PESRV Pointeur vers une structure de données esrv.
- * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
- * \param[in] int L'ID du périphérique virtuel.
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
-*/
-ESRV_API int read_device_current_frequency(PESRV p, void *px, int vd) {
-  
-  /**  px peut être NULL s'il n'est pas nécessaire pour le device. */
-  if(!p) { 
-    goto read_device_current_frequency_error; 
-  }
-  
-  /**
-   * Vérification de l'ID  du "stick". <br>
-   * On pourrait supprimer cette étape puisque dans tous les cas on aura qu'un périphérique. <br>
-   *N.B. : L'ID des périphériques virtuels est par défault 1 (0 a un rôle spécifique).
-   */
-  if(
-     (vd <= 0) || 
-     (vd > p->device_data.virtual_devices)
-     ) { 
-    goto read_device_current_frequency_error; 
-  }
-  
-  /** Collecte les informations concernant la fréquence du courant par le périphérique virtuel via le serveur et les retourne
-   * dans p->double_current_frequency. <br>
-   * L'entier vd est l'ID tu périphérique virtuel donné par le serveur.
-   * vd peut être n'importe quel entier compri entre 0 et le nombre maximum
-   * de périphériques virtuels donné par la fonction init_device_extra_data.<br>
-   * Par défault, le vd max est égal à 0. <br>
-   * La fréquence du courant est donnée en Hz. 
-   *
-   * <strong> TODO : Il faut ajouter le code de lecture de la fréquence du courant ici. </strong>
-   */
-  p->double_current_frequency = 0.0;
-  
-  return(ESRV_SUCCESS);
- read_device_current_frequency_error:
-  return(ESRV_FAILURE);  
-} 
