@@ -1,0 +1,52 @@
+/**
+ * \file main.c
+ * \brief Ce programme permet d'importer les données des wattmètres dans un compteurs.
+ * \author L'équipe TSP Intel Energy Checker
+ * \version 0.1
+ * \date 27 février 2012
+ * 
+ *		
+ */
+
+#include <uuid/uuid.h> // pour identifier le compteur "plugwise".
+#include <stdlib.h> // EXIT_SUCCESS
+#include <unistd.h> // pour l'attente (sleep).
+#include "productivity_link.h" // les fonctions spécifiques aux compteurs.
+
+/**
+ * \fn void main (void)
+ * \brief Création du compteur "plugwise" dans /opt/productivity_link
+ * \return EXIT_SUCCESS code de statut : ok. 
+ * 
+ */
+int main (void) {
+  /** Le type uuid permet de donner un identificateur au compteur */  
+  uuid_t uuid; 
+  
+  unsigned long long pWatt = 0 ;
+  int pld = PL_INVALID_DESCRIPTOR;
+  
+  /** Le nom du compteur est stocké
+   * dans une constante de pointeur de chaine de caractères
+   * const char *counter[].
+   */
+  const char *counter[] = {"puissance"};
+
+  /// Initialisation du stick	
+  mise_en_tension_stick(machintruc);
+  
+  /// Ouverture et test du compteur.
+  if ((pld = pl_open("plugwise",1,counter,&uuid)) != PL_INVALID_DESCRIPTOR){
+    
+       pl_write(pld,&pWatt,0);
+       sleep(1);
+
+
+
+       
+    /// Fermeture du compteur
+    pl_close(pld);
+  }
+  
+  return EXIT_SUCCESS;
+}
