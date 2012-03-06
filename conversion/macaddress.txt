@@ -1,0 +1,5 @@
+## Adresse de la prise n°1 :
+00:0D:F6:00:00:99:8D:F3
+
+## Adresse de la prise n°2 :
+00:0D:F6:00:00:98:FD:F2
