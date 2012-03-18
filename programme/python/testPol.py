@@ -32,7 +32,9 @@ if nbrValeurs <= 0 :
     valeur_Max = 0
     valeur_Min = 0
     while 1:
-        print(os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress))
+        os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress)
+        f = open("TMP~", "r")
+        print(float(f.read()))
         time.sleep(intervalTemps)
             
 else :

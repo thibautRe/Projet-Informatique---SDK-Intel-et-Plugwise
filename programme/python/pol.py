@@ -130,8 +130,10 @@ def main():
         elif command == "OFF":
             plugwise.SetPowerState("00")
         elif command == "POWERINFO":
-            print plugwise.GetPowerInfo()
-        
+            f = open("TMP~", "w")
+            f.write(str(plugwise.GetPowerInfo()))
+            f.close()
+            
 def print_help():
     print
     print "POL (Plugwise on Linux) v0.2 / Maarten Damen"
