@@ -51,7 +51,7 @@ class Plugwise:
         resultint = self.hexToInt(result[4:8])
         corrected = self.PulseCorrection(resultint)
 
-        return self.pulseToWatt(corrected)
+        return self.pulseToWatt(resultint)
 
     def SetPowerState(self, newstate):
         self.SendCommand(self.POWERCHANGECODE + self.macaddress + newstate)

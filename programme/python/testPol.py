@@ -8,9 +8,9 @@
 
 
 nbrValeurs = 0    # 0 pour un nombre infini de valeurs
-intervalTemps = 1.
+intervalTemps = 0.25
 
-circle = 2   #1 ou 2
+circle = 1   #1 ou 2
 
 #--------------------------------------------------------------#
 
@@ -29,11 +29,14 @@ else :
 origineTemps = time.time()
 
 if nbrValeurs <= 0 :
+    valeur_Max = 0
+    valeur_Min = 0
     while 1:
-        os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress)
+        print(os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress))
         time.sleep(intervalTemps)
             
 else :
     for i in range(nbrValeurs) :
-        os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress)
+        a = os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress)
+        print(a)
         time.sleep(intervalTemps)
