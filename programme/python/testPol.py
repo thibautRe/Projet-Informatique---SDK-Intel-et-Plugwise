@@ -29,16 +29,22 @@ else :
 origineTemps = time.time()
 
 if nbrValeurs <= 0 :
-    valeur_Max = 0
-    valeur_Min = 0
     while 1:
         os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress)
         f = open("TMP~", "r")
-        print(float(f.read()))
+        VALEUR = float(f.read())
+        
+        print(VALEUR)
+        
         time.sleep(intervalTemps)
+
             
 else :
     for i in range(nbrValeurs) :
-        a = os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress)
-        print(a)
+        os.system('python pol.py -p ' + port + ' -o ' + macadress + ' -w ' + macadress)
+        f = open("TMP~", "r")
+        VALEUR = float(f.read())
+        
+        
         time.sleep(intervalTemps)
+        
