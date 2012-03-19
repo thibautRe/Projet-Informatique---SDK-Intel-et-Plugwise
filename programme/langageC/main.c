@@ -43,7 +43,6 @@ int main (void) {
   int t0 = time();              /// Timestamp du début de programme
   
   /// Initialisation du stick
-  port_serie_stick(machintruc);
   mise_en_tension_stick(machintruc);
   
   /// Choix du temps d'analyse de la puissance : (en supposant que pl_write et lectureStick se font instantannément)
