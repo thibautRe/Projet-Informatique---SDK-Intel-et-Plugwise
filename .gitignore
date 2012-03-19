@@ -1,8 +1,11 @@
 */.gitignore
 .gitignore
 hello_world/*
-iecsdk/*
+iecsdk/
 Tests/*
 programme/python/lib/
 *~
 *#
+*.o
+*kate*
+*.pyc
