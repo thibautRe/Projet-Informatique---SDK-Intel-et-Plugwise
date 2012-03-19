@@ -12,6 +12,7 @@ intervalTemps = 0.25
 
 circle = 1   #1 ou 2
 
+
 #--------------------------------------------------------------#
 
 
@@ -34,7 +35,7 @@ if nbrValeurs <= 0 :
         f = open("TMP~", "r")
         VALEUR = float(f.read())
         
-        print(VALEUR)
+        print("###-- PUISSANCE MESUREE --### :: " + str(VALEUR) + " W")
         
         time.sleep(intervalTemps)
 
@@ -45,6 +46,7 @@ else :
         f = open("TMP~", "r")
         VALEUR = float(f.read())
         
+        print("###-- PUISSANCE MESUREE --### :: " + str(VALEUR) + " W")
         
         time.sleep(intervalTemps)
         
