@@ -1,14 +1,17 @@
-// On met sous tension le stick
-mise_en_tension_stick(machintruc){
-
+// Initialisation du stick
+void mise_en_tension_stick(int macadress)
+{
+    
 }
 
 // Lecture de la puissance
-lectureStick(machintruc){
-
+float lectureStick(int macadress)
+{
+    
 }
 
 // Mise hors tension du stick
-mise_hs_stick(machintruc){
-
+void mise_hs_stick(int macadress)
+{
+    
 }
