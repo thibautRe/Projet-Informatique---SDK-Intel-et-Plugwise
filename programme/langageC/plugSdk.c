@@ -47,7 +47,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   /// "Temps" d'exécution du programme 
   float nbrAnalysesParSecondes; /// Initialisée plus bas
   int tempsDanalyse;            /// Initialisée plus bas
-  int t0 = time();              /// Timestamp du début de programme
+  int t0 = time(NULL);              /// Timestamp du début de programme
   
   /// Racines des répertoires
   char racinePython[TAILLE_RACINE];
@@ -63,7 +63,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   
   /// Choix du "temps" d'analyse de la puissance : 
   printf("Combien d'analyses par secondes voulez-vous faire ?\n"); // attention on ne peut pas passer en dessous d'une analyse par secondes
-  scanf("%d",&nbrAnalysesParSecondes);
+  scanf("%f",&nbrAnalysesParSecondes);
   printf("Pendant combien de temps (secondes) voulez-vous lancer l'analyse ?\n");
   scanf("%d",&tempsDanalyse);
   
@@ -83,7 +83,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   
    lancement_interface_graphique_sdk(commande,racineSDK,&architecture); 
   
-   while (time() <= t0 + tempsDanalyse)
+   while (time(NULL) <= (t0 + tempsDanalyse))
      {
        // On actualise le(s) compteur(s) i
        for (i = 0; i < nb_circle; i++){
@@ -94,6 +94,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
        }
        sleep(1/nbrAnalysesParSecondes);
      }
+   printf("Analyse finie !\n");
    
    /// Fermeture du compteur avant l'arrêt du programme
    pl_close(pld);
