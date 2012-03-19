@@ -11,11 +11,13 @@
  * les données de puissance sont collectées puis écrites dans les compteurs. <br>
  * Avant que le programme s'arrête, il ferme le compteur, puis éteint le Stick.
  */
-#include <uuid/uuid.h> // pour identifier le compteur "plugwise".
-#include <stdlib.h> // EXIT_SUCCESS
-#include <unistd.h> // pour l'attente (sleep).
-#include "productivity_link.h" // les fonctions spécifiques aux compteurs.
-#include "plugwise.h" // les fonctions permettant d'allumer, initialiser, utiliser, éteindre le Stick de Plugwise.
+#include <uuid/uuid.h>          // pour identifier le compteur "plugwise".
+#include <stdlib.h>             // EXIT_SUCCESS
+#include <unistd.h>             // pour l'attente (sleep).
+#include <time.h>               // Timer pour l'arrêt du programme.
+#include <unistd.h>             // Pour mettre en veille le programme.
+#include "productivity_link.h"  // les fonctions spécifiques aux compteurs.
+#include "plugwise.h"           // les fonctions permettant d'allumer, initialiser, utiliser, éteindre le Stick de Plugwise.
 
 /**
  * \fn void main (void)
@@ -23,6 +25,7 @@
  * \return EXIT_SUCCESS code de statut : ok. 
  * \return EXIT_FAILURE code de statut : erreur.
  */
+
 int main (void) {
   /** Le type uuid permet de donner un identificateur au compteur */  
   uuid_t uuid; 
@@ -35,28 +38,34 @@ int main (void) {
    */
   const char *counter[] = {"puissance"};
   
-  int time;
-  int compteurTime=0;
+  float nbrAnalysesParSecondes; /// Initialisée plus bas
+  int tempsDanalyse;            /// Initialisée plus bas
+  int t0 = time();              /// Timestamp du début de programme
   
-  /// Initialisation du stick	
+  /// Initialisation du stick
   port_serie_stick(machintruc);
   mise_en_tension_stick(machintruc);
   
   /// Choix du temps d'analyse de la puissance : (en supposant que pl_write et lectureStick se font instantannément)
-  printf("Pendants combien de temps (seconde) voulez-vous analyser la puissance ?\n");
-  scanf("%d",&time);
+  printf("Combien d'analyses par secondes voulez-vous faire ?\n");
+  scanf("%d",&nbrAnalysesParSecondes);
+  printf("Pendant combien de temps (secondes) voulez-vous lancer l'analyse ?\n");
+  scanf("%d",&tempsDanalyse);
+  
   
   /// Ouverture et test du compteur.
-  if ((pld = pl_open("plugwise",1,counter,&uuid)) != PL_INVALID_DESCRIPTOR){
+  if ((pld = pl_open("plugwise",1,counter,&uuid)) != PL_INVALID_DESCRIPTOR)
+  {
     
-    while(compteurTime!=time){
+    while (time() <= t0 + tempsDanalyse)
+    {
       /// Lecture des données de puissance collectées par le Stick.
+      /// TODO
       pWatt = lectureStick(machintruc);
       
       /// pWatt est alors lue par le compteur.
       pl_write(pld,&pWatt,0);
-      sleep(1);
-      compteurTime++;
+      sleep(1/nbrAnalysesParSecondes);
     }
     
     /// Fermeture du compteur
