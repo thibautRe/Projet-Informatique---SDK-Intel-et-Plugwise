@@ -1,0 +1,70 @@
+﻿TUTORIEL : Comment compiler le SDK Intel Energy Checker©
+
+Ce tutoriel permet dans un premier temps de créer les librairies nécessaires pour utiliser les compteurs  et le serveur esrv et de créer l'exécutable esrv. Une fois les librairies de bases installées, on va créer la librairie permettant de simuler le wattmètre à l'aide des informations de la charge CPU afin de tester l'interface graphique et l'exportation vers excel.
+En réalité la compilation du serveur ESRV n'est pas nécessaire mais elle nous permettra dans un premier temps de tester si la compilation a été correctement effectuée.
+Pour finir nous verrons comment lancer le serveur ESRV, l'interface graphique PL_GUI_MONITOR et l'outil d'exportation de compteurs PL_CSV_LOGGER.
+ Etape 1 : téléchargements
+	- du SDK Intel Energy Checker : http://software.intel.com/en-us/articles/intel-energy-checker-sdk ;
+	- de ganglia :
+		- le .rpm de développement http://pkgs.org/centos-6-rhel-6/epel-x86_64/ganglia-devel-3.1.7-3.el6.x86_64.rpm/download/ ;
+		- le tarball de ganglia : http://sourceforge.net/projects/ganglia/files/latest/download?source=files.
+Etape 2 : installation du JDK (plateforme de développement java)
+Elle est nécessaire pour l'interface graphique du SDK, mais attention ne confondez pas le JRE avec le JDK.
+Pour l'installation : http://doc.ubuntu-fr.org/java [section 3.3].
+
+Etape 3 : création des répertoires
+Décompresser le dossier SDK Intel Energy Checker dans le répertoire d'installation souhaité.
+Ensuite, il faut créer le répertoire productivity_link (sous linux, on le créé dans le répertoire /opt).
+Etape 4 : installations complémentaires
+	- bibliothèque uuid : sudo apt-get install uuid uuid-dev ;
+	- sample pl2ganglia : on se place dans le répertoire contenant le .rpm de développement et le tarball de ganglia téléchargé précédemment puis,
+		- on convertie le fichier .rpm en fichier .deb l'aide d'alien (installation : sudo apt-get install alien) : sudo alien -k nom_du_fichier.rpm ;
+		- on installe le fichier .deb créé : sudo dpkg -i nom_du_fichier.deb ;
+		- on installe les dépendances de ganglia :
+			- sudo apt-get install libapr1-dev ;
+			- installation de libconfuse :
+				- on ajoute au fichier /etc/apt/sources.list la ligne : deb http://ubuntu.mirror.cambrium.nl/ubuntu/ lucid main universe ;
+				- sudo apt-get update ; sudo apt-get install libconfuse-dev ;
+				- sudo apt-get install libexpat1-dev ;
+				- sudo apt-get install libpcre3-dev ;
+		- on installe ganglia : dans le répertoire ganglia-<version> taper ./configure puis make puis sudo make install.
+Etape 5 : configuration du makefile dans <rep_install>/build/linux et compilation
+Tout d'abord, pour plus de clarté, on supprime toutes les premières lignes commentées avec tout le blabla du copyright.
+Ensuite, on change le dossier de la ligne 4 "IECSDK_ROOT=/orssg-data/Development/iecsdk" : à la place de /orssg-data/Development/iecsdk on met le chemin du répertoire d'installation.
+
+Suivant notre architecture 32 ou 64 bits on va décommenter ou non les lignes :
+IECSDK_ADDRESSING = 32 et IECSDK_ADDRESSING = 64.
+
+Ensuite, il faut changer tous les chemins entre les lignes 30 et 38 s'ils ne sont pas bons, pour la bibliothèque java, à savoir JAVA_PATH, JAVA_INCLUDE_PATH et JAVA_LINUX_INCLUDE_PATH. Voici ce que j'ai :
+JAVA_PATH=/usr/lib/jvm/java-1.6.0-openjdk/bin
+JAVA_INCLUDE_PATH=/usr/lib/jvm/java-1.6.0-openjdk/include
+JAVA_LINUX_INCLUDE_PATH=/usr/lib/jvm/java-1.6.0-openjdk/include/linux
+Les lignes qui suivent permettent d'indiquer les chemins vers la bibliothèque Ganglia.
+
+Voici mes lignes :
+IECSDK_GANGLIA_ROOT=/opt/ganglia-3.2.0
+IECSDK_GANGLIA_INCLUDE=$(IECSDK_GANGLIA_ROOT)/include
+IECSDK_GANGLIA_GMETRIC=$(IECSDK_GANGLIA_ROOT)/gmetric
+IECSDK_GANGLIA_LIB=$(IECSDK_GANGLIA_ROOT)/lib
+Pour finir make all.
+Etape 6 : configuration du makefile dans iescsdk/utils/device_driver_kit/build/linux et compilation
+Ici il faut changer IECSDK_ROOT et IECSDK_ADDRESSING comme précédemment.
+Puis on fait make all.
+Etape 7 : lancement de ESRV
+1) Copier dans un même répertoire :
+	- le binaire <repertoire_d_installation_iecsdk>bin/energy_server/linux/x64/esrv (x64 doit être remplacé par x86 sur un système 32-bits) ;
+	- les fichiers de la bibliothèque créée <repertoire_d_installation_iecsdk>/utils/device_driver_kit/build/linux.
+2) Dans ce répertoire, lancer la commande :
+./esrv --start --library ./esrv_cpu_indexed_simulated_device.so
+3) Visualisation des résultats dans l'interface "PL GUI Monitor" fournie avec le SDK :
+Il faut connaître l'UUID de l'instance d'ESRV qui est lancée. L'UUID est le terme écrit entre crochets devant "Using Guid:" dans la console.
+Ensuite, on lance l'interface graphique à l'aide d'une autre console avec : <repertoire_d_installation_iecsdk>/bin/companion_applications/pl_gui_monitor/linux/X64/pl_gui_monitor  /opt/productivity_link/esrv_<UUID>/pl_config.ini.
+> Remarque : si l'on veut qu'il y ait moins de compteurs par fenêtre, il faut rajouter l'option --geometry "gauges=axb" à la commande pl_gui_monitor avec a le nombre de compteurs par lignes et b le nombre de compteurs par colonnes.
+Etape 8 : intégration d'une librairie (ex : wattmètre Plugwise)
+Il faut créer le driver .so puis l'include à la compilation via l'option --library. Voir la documentation pour plus de détails : http://software.intel.com/en-us/articles/download-intel-energy-checker-sdk/.
+Bonus : exporter les compteurs dans un fichier .csv (peut être lu par un tableur)
+On utilise la commande pl_csv_logger qui va afficher dans le terminal pleins de nombres séparés par des virgules. Au lieu de les afficher, on va les importer dans un fichier .csv :
+<chemin_iecsdk>/build/linux/pl_csv_logger /opt/productivity_link/esrv_<UUID>/pl_config.ini > ~/Bureau/compteurs.csv
+Il ne reste plus qu'à l'ouvrir avec Excel ou le tableur de Open ou Libre office ou autre et d'identifier les compteurs.
+Elaboration de cette aide, sous ubuntu 10.04 64bits, grâce au tutoriel du Green Code Lab (http://greencodelab.fr/content/intel-energy-checker-tutoriel-0), de la documentation du SDK et des nombreuses erreurs de dépendances !
+
