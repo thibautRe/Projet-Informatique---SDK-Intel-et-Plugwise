@@ -47,7 +47,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
    *
    * COMMENT ALLOUER DYNAMIQUEMENT un const char* ?
    */
-  const char *counters_names[]={"puissance1","puissance2"}; 
+  const char *counters_names[]={"puissance1","puissance2","puissance3","puissance4"}; 
     
   
   char racineSDK[TAILLE_RACINE]     = "";
@@ -118,15 +118,26 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
     return EXIT_FAILURE;
   }
 
-  // A FAIRE : CREER UN MENU DEMANDANT A L'UTILISATEUR DE CHOISIR ENTRE :
-  //                 - lancer l'interface graphique ;
-  //                 - créer un fichier .csv à lancer dans un tableur à l'aide de iecsdk/build/linux/pl_csv_logger
-  //                   (il s'utilise comme ça : /../iesdk/../pl_csv_logger >> /blabla/fichierCSV.csv
-  //                 - les deux.
+  // MENU 
+  int choixMenu;
+  printf("Choisissez :\n");
+  printf("1 pour pl_gui_monitor\n");
+  printf("2 pour pl_csv_logger\n");
+  printf("3 pour les deux\n");
+  scanf("%d",&choixMenu);
+  switch (choixMenu){
+  case 1 :
+    lancement_interface_graphique_sdk(commande,racineSDK,&architecture);
+    break; 
+  case 2:
+    // Youpilou !
+    lancement_pl_csv_logger_sdk(commande,racineSDK);
+    break;
+  case 3 : 
+    lancement_pl_csv_logger_sdk(commande,racineSDK);
+    lancement_interface_graphique_sdk(commande,racineSDK,&architecture);
+  }
   
-   // TODO Décommenter cette ligne pour ceux dont l'interface graphique marche
-   //lancement_interface_graphique_sdk(commande,racineSDK,&architecture); 
-   
    // Affichage d'un message d'information
    afficherDebutProgramme();
    

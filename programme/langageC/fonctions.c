@@ -52,6 +52,14 @@ void lancement_interface_graphique_sdk(char commande[], char racineSDK[], int *a
   system(commande); 
 }
 
+void lancement_pl_csv_logger_sdk(char commande[], char racineSDK[]){
+printf("***********************************\n");
+printf("* Lancement de PL CSV LOGGER  ... *\n");
+sprintf(commande,"xterm -e \"%s/iecsdk/build/linux/pl_csv_logger /opt/productivity_link/plugwise_*/pl_config.ini >> ~/Bureau/valeurs_plugwise.csv\" &",racineSDK);
+system(commande);
+printf("***********************************\n");
+}
+
 unsigned long long mesure_watt(int i, char commande[]){
   FILE *pp;
   char tampon[TAILLE_TAMPON];
