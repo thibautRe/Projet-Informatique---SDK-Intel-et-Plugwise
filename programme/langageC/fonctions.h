@@ -11,6 +11,10 @@
 #define TAILLE_COMMANDE (400+1)
 #define TAILLE_NOM_COMPTEUR (20+1)
 
+#define DEBUG_MODE
+#define ADRESSE_MAC_CIRCLE1     "000F6D0000998BF3"
+#define ADRESSE_MAC_CIRCLE2     "000F6D000098??F2"
+
 typedef char adresseMAC[TAILLE_ADRESSE_MAC];
 
 void initialiser_chemin_sdk(char racineSDK[]);

@@ -9,3 +9,5 @@ programme/python/lib/
 *.o
 *kate*
 *.pyc
+TEST
+programme/langageC/plugSdk

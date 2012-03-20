@@ -12,22 +12,30 @@ void initialiser_chemin_python(char racinePython[]){
   
 void initialiser_plugwise(char racinePython[],int *nb_circle, adresseMAC *tabMAC[]){
   int i;
-  initialiser_chemin_python(racinePython);
   
-  printf("Vous souhaitez mesurez la puissance de combien d'appareils ?\n");
-  scanf("%d",nb_circle);
-
+  while (*nb_circle <= 0)
+  {
+    printf("De combien de circles souhaitez-vous mesurez la consommation ?\n");
+    scanf("%d",nb_circle);
+  }
+  
    //allocation_adresse_MAC(*nb_circle,&tabMAC);
 	if((*tabMAC = malloc((*nb_circle)*sizeof(adresseMAC[TAILLE_ADRESSE_MAC])))==NULL){
     perror("Problème d'allocation mémoire des adresses MAC !\n");
     return exit(EXIT_FAILURE);
 }
 
-// adresse(s) MAC des circle  
+// adresse(s) MAC des circle
 	printf("*** Adresse(s) MAC ***\n");
   	for (i=0 ; i < *nb_circle ; i++){
-    	printf("Adresse MAC du Circle %d : ",i+1);
-    	scanf("%s",(*tabMAC)[i]);
+        #ifdef DEBUG_MODE
+            tabMAC[0] = ADRESSE_MAC_CIRCLE1;
+            if (nb_circle == 2)
+                tabMAC[1] = ADRESSE_MAC_CIRCLE2;
+        #else
+            printf("Adresse MAC du Circle %d : ",i+1);
+            scanf("%s",(*tabMAC)[i]);
+        #endif
 }
 //noms_compteurs_sdk(*nb_circle);
 }

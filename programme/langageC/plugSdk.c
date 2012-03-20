@@ -12,11 +12,14 @@
  */
 #include <uuid/uuid.h>          // pour identifier le compteur "plugwise".
 #include <stdlib.h>             // EXIT_SUCCESS
+#include <string.h>             // strcmp
 #include <unistd.h>             // pour l'attente (sleep).
 #include <time.h>               // Timer pour l'arrêt du programme.
 #include <unistd.h>             // Pour mettre en veille le programme.
 #include "productivity_link.h"  // les fonctions spécifiques aux compteurs.
-#include "fonctions.h"           
+#include "fonctions.h"
+
+
 
 /**
  * \fn void main (void)
@@ -44,28 +47,63 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
    */
   const char *counters_names[]={"puissance1","puissance2"}; 
     
+  
+  char racineSDK[TAILLE_RACINE]     = "";
+  char racinePython[TAILLE_RACINE]  = "";
+  
   /// "Temps" d'exécution du programme 
   float nbrAnalysesParSecondes; /// Initialisée plus bas
   int tempsDanalyse;            /// Initialisée plus bas
   int t0 = time(NULL);              /// Timestamp du début de programme
-  
-  /// Racines des répertoires
-  char racinePython[TAILLE_RACINE];
-  char racineSDK[TAILLE_RACINE];
   
   adresseMAC *tabMAC=NULL;
   
   int nb_circle;
   int architecture;
   
-  initialiser_chemin_sdk(racineSDK); 
+#ifdef DEBUG_MODE
+    char login;
+    printf("**********  MODE DEBUG  ************\n");
+    printf("Entrez votre login\n");
+    scanf("%c", &login);
+    
+    // Propriétés Thibaut
+    if (login == 't')
+    {
+        strcpy(racineSDK, "/home/thibaut/Projet_Info");
+        strcpy(racinePython, "/home/thibaut/Projet_Info/programme/python");
+        nb_circle                           = 1;
+        nbrAnalysesParSecondes              = 1;
+        tempsDanalyse                       = 500;
+    }
+    
+    /* ------------------------------------------ *
+     *    AJOUTEZ ICI VOS PROFILS D'IMPORTATION   *
+     * ------------------------------------------ */
+    
+#endif
+        
+        
+    
+  
+  while (strcmp(racineSDK, "") == 0)
+    initialiser_chemin_sdk(racineSDK);
+  while (strcmp(racinePython, "") == 0)
+      initialiser_chemin_python(racinePython);
   initialiser_plugwise(racinePython,&nb_circle,&tabMAC);
   
   /// Choix du "temps" d'analyse de la puissance : 
-  printf("Combien d'analyses par secondes voulez-vous faire ?\n"); // attention on ne peut pas passer en dessous d'une analyse par secondes
-  scanf("%f",&nbrAnalysesParSecondes);
-  printf("Pendant combien de temps (secondes) voulez-vous lancer l'analyse ?\n");
-  scanf("%d",&tempsDanalyse);
+  while (nbrAnalysesParSecondes <= 0)
+  {
+    printf("Combien d'analyses par secondes voulez-vous faire ?\n"); // attention on ne peut pas passer en dessous d'une analyse par secondes
+    scanf("%f",&nbrAnalysesParSecondes);
+  }
+  
+  while (tempsDanalyse <= 0)
+  {
+    printf("Pendant combien de temps (secondes) voulez-vous lancer l'analyse ?\n");
+    scanf("%d",&tempsDanalyse);
+  }
   
   /// On supprime l'ancien productivity link "plugwise", puis on ouvre le nouveau
   system("rm -r /opt/productivity_link/plugwise_* 2> /dev/null");
@@ -81,7 +119,8 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   //                   (il s'utilise comme ça : /../iesdk/../pl_csv_logger >> /blabla/fichierCSV.csv
   //                 - les deux.
   
-   lancement_interface_graphique_sdk(commande,racineSDK,&architecture); 
+   // TODO Décommenter cette ligne pour ceux dont l'interface graphique marche
+   //lancement_interface_graphique_sdk(commande,racineSDK,&architecture); 
   
    while (time(NULL) <= (t0 + tempsDanalyse))
      {
