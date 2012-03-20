@@ -16,8 +16,10 @@
 #include <unistd.h>             // pour l'attente (sleep).
 #include <time.h>               // Timer pour l'arrêt du programme.
 #include <unistd.h>             // Pour mettre en veille le programme.
+
 #include "productivity_link.h"  // les fonctions spécifiques aux compteurs.
 #include "fonctions.h"
+#include "affichage.h"          // Les fonctions d'affichage ASCII
 
 
 
@@ -63,7 +65,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   
 #ifdef DEBUG_MODE
     char login;
-    printf("**********  MODE DEBUG  ************\n");
+    afficherDebugMode();
     printf("Entrez votre login\n");
     scanf("%c", &login);
     
@@ -77,9 +79,12 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
         tempsDanalyse                       = 500;
     }
     
+    
+    
     /* ------------------------------------------ *
      *    AJOUTEZ ICI VOS PROFILS D'IMPORTATION   *
      * ------------------------------------------ */
+    
     
 #endif
         
@@ -121,18 +126,24 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   
    // TODO Décommenter cette ligne pour ceux dont l'interface graphique marche
    //lancement_interface_graphique_sdk(commande,racineSDK,&architecture); 
-  
+   
+   // Affichage d'un message d'information
+   afficherDebutProgramme();
+   
    while (time(NULL) <= (t0 + tempsDanalyse))
      {
        // On actualise le(s) compteur(s) i
-       for (i = 0; i < nb_circle; i++){
-	 commande_python(i,racinePython,tabMAC,commande);
-	 
-	 puissance = mesure_watt(i,commande);
-	 pl_write(pld,&puissance,i);
+       for (i = 0; i < nb_circle; i++)
+       {
+            commande_python(i,racinePython,tabMAC,commande);
+            
+            puissance = mesure_watt(i,commande);
+            pl_write(pld,&puissance,i);
+            printf(".\n");
        }
        sleep(1/nbrAnalysesParSecondes);
      }
+     
    printf("Analyse finie !\n");
    
    /// Fermeture du compteur avant l'arrêt du programme
