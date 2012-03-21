@@ -99,7 +99,7 @@ def main():
     except getopt.error, why:
         print_help()
 
-    port = 16
+    port = "/dev/ttyUSB0"
     macaddress = ''
     newstate = ''
     command = ''
