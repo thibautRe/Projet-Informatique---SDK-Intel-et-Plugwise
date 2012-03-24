@@ -1,6 +1,7 @@
 #include "affichage.h"
 
 #include <stdio.h>       // printf
+#include <stdlib.h> // system
 
 /**
  * \file    affichage.c
@@ -8,6 +9,10 @@
  * \author  Thibaut REMY
  * \date    20 / 03 / 2012
  */
+
+void effacerEcran(void){
+  system("clear");
+}
 
 void afficherDebutProgramme()
 {

@@ -9,7 +9,8 @@
  * \date    20 / 03 / 2012
  */
 
-void afficherDebutProgramme();
-void afficherDebugMode();
+void effacerEcran(void);
+void afficherDebutProgramme(void);
+void afficherDebugMode(void);
 
 #endif
