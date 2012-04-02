@@ -116,6 +116,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
     /// NE FAUDRAIT-IL PAS PLUTOT CHOISIR COMBIEN D'ANALYSES PAR MINUTES ???
     /// (on ne sait pas encore comment actualiser les compteurs du SDK au dessous d'un échantillon par secondes)
     scanf("%f",&nbrAnalysesParSecondes);
+  }
   
   while (tempsDanalyse <= 0)
   {
@@ -186,17 +187,20 @@ for (i = 0; i < nb_circle; i++){
    while (time(NULL) <= (t0 + tempsDanalyse))
      {
        // On actualise le(s) compteur(s) 2i
-       for (i = 0; i < nb_circle; i++){
-	 commande_python(i,racinePython,tabMAC,commande);
-	 
-	 puissance = (unsigned long long) (mesure_watt(commande) * ECHELLE);
-	 ret = pl_write(pld,&puissance,2*i);
-	 if (ret == PL_FAILURE){
-	   perror("Erreur lors de l'écriture des compteurs !\n");
-	   return EXIT_FAILURE;
-	 }
-	 ret = PL_FAILURE;
-	 printf(".");
+       for (i = 0; i < nb_circle; i++)
+       {
+            commande_python(i,racinePython,tabMAC,commande);
+            
+            puissance = (unsigned long long) (mesure_watt(commande) * ECHELLE);
+            ret = pl_write(pld,&puissance,2*i);
+            if (ret == PL_FAILURE)
+            {
+                perror("Erreur lors de l'écriture des compteurs !\n");
+                return EXIT_FAILURE;
+            }
+            ret = PL_FAILURE;
+            printf(".");
+            fflush(stdout);
        }
        sleep(1);
      }
