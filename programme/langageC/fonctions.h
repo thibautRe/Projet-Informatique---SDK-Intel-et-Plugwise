@@ -6,17 +6,16 @@
 #include <string.h>
 #include <uuid/uuid.h>
 
-#define TAILLE_TAMPON (10+1)
+#define TAILLE_TAMPON (512+1)
+#define TAILLE_NOM_CONFIGURATION (256+1)
+		
 #define TAILLE_RACINE (256+1)
 #define TAILLE_ADRESSE_MAC (16+1)
 #define TAILLE_COMMANDE (400+1)
 #define TAILLE_NOM_COMPTEUR (20+1)
 #define TAILLE_UUID (36+1)
 
-#define DEBUG_MODE
-#define ADRESSE_MAC_CIRCLE1     "000D6F0000998BF3"
-#define ADRESSE_MAC_CIRCLE2     "000D6F000098??F2"
-
+typedef char NomConfiguration[TAILLE_NOM_CONFIGURATION];
 typedef char adresseMAC[TAILLE_ADRESSE_MAC];
 
 void initialiser_chemin_sdk(char racineSDK[]);
