@@ -20,6 +20,7 @@
 #include "productivity_link.h"  // les fonctions spécifiques aux compteurs.
 #include "fonctions.h"
 #include "affichage.h"          // Les fonctions d'affichage ASCII
+#include "pol.h"                // POL
 
 #define NOMBRE_DECIMALES 4
 #define ECHELLE 10000.0 // 10^4
@@ -79,6 +80,8 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
 #ifdef DEBUG_MODE
     char login;
     afficherDebugMode();
+    
+    afficher();
     printf("Entrez votre login\n");
     scanf("%c", &login);
     
@@ -192,7 +195,9 @@ for (i = 0; i < nb_circle; i++){
             commande_python(i,racinePython,tabMAC,commande);
             
             puissance = (unsigned long long) (mesure_watt(commande) * ECHELLE);
-            ret = pl_write(pld,&puissance,2*i);
+            if (puissance <= PUISSANCE_MAX)
+                ret = pl_write(pld,&puissance,2*i);
+            
             if (ret == PL_FAILURE)
             {
                 perror("Erreur lors de l'écriture des compteurs !\n");

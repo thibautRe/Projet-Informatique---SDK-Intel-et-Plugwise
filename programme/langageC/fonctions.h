@@ -14,9 +14,11 @@
 #define TAILLE_UUID (36+1)
 
 #define DEBUG_MODE
+
 #define ADRESSE_MAC_CIRCLE1     "000D6F0000998BF3"
 #define ADRESSE_MAC_CIRCLE2     "000D6F000098??F2"
 
+#define PUISSANCE_MAX 100
 typedef char adresseMAC[TAILLE_ADRESSE_MAC];
 
 void initialiser_chemin_sdk(char racineSDK[]);
