@@ -76,34 +76,34 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   
   int nb_circle = 0;
   int architecture;
+ 
+  effacerEcran();
   
-#ifdef DEBUG_MODE
-    char login;
-    afficherDebugMode();
-    
-    afficher();
-    printf("Entrez votre login\n");
-    scanf("%c", &login);
-    
-    // Propriétés Thibaut
-    if (login == 't')
-    {
-        strcpy(racineSDK, "/home/thibaut/Projet_Info");
-        strcpy(racinePython, "/home/thibaut/Projet_Info/programme/python");
-        nb_circle                           = 1;
-        nbrAnalysesParSecondes              = 1;
-        tempsDanalyse                       = 500;
-    }
-    
-    
-    
-    /* ------------------------------------------ *
-     *    AJOUTEZ ICI VOS PROFILS D'IMPORTATION   *
-     * ------------------------------------------ */
-    
-    
-#endif
-        
+  // MENU CONFIGURATIONS
+  
+  printf("Que souhaitez-vous faire ?\n");
+  printf("1 : Charger une configuration existante\n");
+  printf("2 : Créer une nouvelle configuration [A FAIRE !]\n");
+  printf("3 : Supprimer une configuration [A FAIRE !]\n");
+  printf("4 : Lancer le programme sans toucher aux configurations\n");
+  
+  printf("Votre choix : ");
+  scanf("%d",&choixMenu);
+  
+  effacerEcran();
+  
+  if(choixMenu==1){ // IE. CHARGEMENT D'UNE CONFIGURATION EXISTANTE
+    // ouverture du fichier
+    configurations = fopen("configurations.txt","r+");
+    if (configurations == NULL){
+      perror("Erreur lors de l'ouverture du fichier configurations.txt\n");
+      return EXIT_FAILURE;
+    }   
+    /** Le fichier configurations.txt comporte autant de lignes que de configurations.
+     * Ainsi une ligne constitue une configuration ; elle se lit de la manière suivante :
+     * nom_configuration racineSDK racinePython nb_circle adresseMAC1 adresseMAC2 etc.
+     */
+     
         
     effacerEcran();
   
