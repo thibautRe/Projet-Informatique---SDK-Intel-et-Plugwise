@@ -159,7 +159,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
     initialiser_chemin_python(racinePython);
   
   if(choixMenu == 4)
-    initialiser_plugwise(racinePython,&nb_circle,&tabMAC);
+    initialiser_plugwise(racinePython,&nb_circles,&tabMAC);
   
   // Choix du "temps" d'analyse de la puissance : 
   while (nbrAnalysesParSecondes <= 0){
@@ -178,7 +178,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   // system("rm -r /opt/productivity_link/plugwise_* 2> /dev/null"); 
   // On supprime les anciens productivity link plugwise ou pas ?
   
-  pld = pl_open("plugwise",2*nb_circle,counters_names,&uuid);
+  pld = pl_open("plugwise",2*nb_circles,(const char **) counters_names,&uuid);
   if (pld == PL_INVALID_DESCRIPTOR){
     perror("Problème lors de l'ouverture du compteur !\n");
     return EXIT_FAILURE;
@@ -201,7 +201,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
    * de décimales du compteur "compteur" et non en tant que compteur normal.
    */
   
-for (i = 0; i < nb_circle; i++){
+for (i = 0; i < nb_circles; i++){
     ret = pl_write(pld,&decimales,2*i+1);
     if (ret == PL_FAILURE){
       perror("Erreur lors de l'écriture des \"compteurs\" statiques des décimales !\n");
@@ -234,7 +234,7 @@ for (i = 0; i < nb_circle; i++){
   
   while (time(NULL) <= (t0 + tempsDanalyse)){
     // On actualise le(s) compteur(s) 2i
-    for (i = 0; i < nb_circle; i++)
+    for (i = 0; i < nb_circles; i++)
       {
 	commande_python(i,racinePython,tabMAC,commande);
         
