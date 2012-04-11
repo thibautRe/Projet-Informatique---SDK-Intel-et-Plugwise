@@ -6,14 +6,16 @@
 #include <string.h>
 #include <uuid/uuid.h>
 
+#include "allocation_memoire.h"
+
 #include "constantes.h"
 
 void initialiser_chemin_sdk(char racineSDK[]);
 void initialiser_chemin_python(char racinePyhon[]);
-void initialiser_plugwise(char racinePython[],int *nb_circles,AdresseMAC *tabMAC[]);
-void lancement_interface_graphique_sdk(char racineSDK[], char strUUID[], int *architecture);
-void lancement_pl_csv_logger_sdk(char racineSDK[], char strUUID[]);
+void initialiser_plugwise(char racinePython[],int *nb_circles,AdresseMAC *tabMAC[], char **counters_names[]);
+void lancement_interface_graphique_sdk(char racineSDK[], char strUUID[], int *architecture, int *pid_pl_gui_monitor);
+void lancement_pl_csv_logger_sdk(char racineSDK[], char strUUID[], int *pid_pl_csv_logger);
 double mesure_watt(char *commande);
 void commande_python(int i, char racinePython[], AdresseMAC tabMAC[],char commande[]);
-
+int recuperer_pid(char processus[]);
 #endif

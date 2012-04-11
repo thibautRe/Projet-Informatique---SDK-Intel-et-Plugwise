@@ -126,34 +126,6 @@ void recuperation_donnees_statiques(int choixMenu, int configurationChoisie, Nom
   fclose(configurations);
 }
 
-
-void allocation_dynamique_adresses_mac(int nb_circles, AdresseMAC *tabMAC[]){
-  if((*tabMAC = malloc((nb_circles)*sizeof(AdresseMAC)))==NULL){
-    perror("Problème d'allocation mémoire des adresses MAC !\n");
-    return exit(EXIT_FAILURE);
-  }
-}
-
-
-void allocation_dynamique_noms_compteurs(int nb_circles, char ***counters_names){
-  int i;
-  
-  *counters_names = calloc(2*nb_circles,sizeof(char*));
-  if (*counters_names == NULL){
-    perror("Erreur lors du calloc\n");
-    return exit(EXIT_FAILURE);
-  }
-  
-  for (i=0 ; i < 2*nb_circles ; i++){
-    (*counters_names)[i] = malloc(TAILLE_NOM_COMPTEUR*sizeof(char));
-    if ((*counters_names)[i] == NULL){
-      perror("Erreur du malloc \n");
-      return exit(EXIT_FAILURE);
-    }
-  }
-}
-
-
 void recuperation_donnees_dynamiques(int configurationChoisie, int nb_circles, AdresseMAC tabMAC[],char **counters_names){
   
   int i                = 1 ; // On commence à lire dès la première ligne
@@ -203,29 +175,8 @@ void afficher_configuration(int configurationChoisie, NomConfiguration tabConfig
   printf("Elements dont vous souhaitez mesurer la puissance :\n");
   for (i=0 ; i < nb_circles - 1 ; i++)
     printf("  - %s (%s) ;\n", counters_names[2*i], tabMAC[i]);
-  printf("  - %s (%s).\n", counters_names[i], tabMAC[i]);
+  printf("  - %s (%s).\n", counters_names[2*i], tabMAC[i]);
 }
-
-
-void desallocation(int nb_circles, NomConfiguration *tabConfigurations[], AdresseMAC *tabMAC[], char ***counters_names){
-  
-  int i;
-  
-  free(*tabConfigurations);
-  *tabConfigurations=NULL;
-
-  free(*tabMAC);
-  *tabMAC=NULL;
-  
-  for (i=0;i<nb_circles;i++){
-    free((*counters_names)[i]);
-    (*counters_names)[i]=NULL;
-  }
-  
-  free(*counters_names);
-  *counters_names=NULL;
-}
-
 
 void ecrire_donnees_statiques(int choixMenu, int nbConfigurations, NomConfiguration tabConfigurations[], char racinePython[], int *nb_circles){
   
@@ -293,7 +244,6 @@ void ecrire_donnees_dynamiques(int choixMenu, int nb_circles, AdresseMAC tabMAC[
   for (i=0 ; i < nb_circles ; i++){
     fprintf(configurations,"%s ",counters_names[2*i]);
   }
-  fprintf(configurations,"\n");
   
   rewind(configurations);
   fclose(configurations);

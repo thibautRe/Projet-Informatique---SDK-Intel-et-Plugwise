@@ -3,7 +3,7 @@
  * \brief Ce programme permet d'importer les données des wattmètres Plugwise© dans un productivity link et de lancer des applications du SDK.
  * \author L'équipe TSP SDK / Plugwise
  * \version 1.2
- * \date 9 avril 2012
+ * \date 11 avril 2012
  * 
  * Dans un premier temps le programme initialise le(s) compteur(s) et importe les adresses MAC.<br>
  * Après avoir demandé pendant combien de temps on voulait effectuer l'analyse énergétique, <br>
@@ -16,6 +16,8 @@
 #include <string.h>             // strcmp
 #include <time.h>               // Timer pour l'arrêt du programme.
 #include <unistd.h>             // Pour mettre en veille le programme.
+#include <sys/types.h>          // appel à kill
+#include <signal.h>             // SIGINT et SIGKILL
 
 #include "constantes.h"
 
@@ -23,6 +25,7 @@
 #include "fonctions.h"
 #include "affichage.h"          // Les fonctions d'affichage ASCII
 #include "gestion_configurations.h"
+#include "allocation_memoire.h"
 
 /**
  * \fn void main (void)
@@ -32,7 +35,7 @@
  */
 int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utiliser les redirections avec la fonction popen
   /* BOUCLES */
-  int i=0, j=0;
+  int i=0;
   
   /* CONFIGURATION */
   int nbConfigurations                = 0;
@@ -55,10 +58,13 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   
   /* TEMPS D'EXECUTION DU PROGRAMME */
   float nbrAnalysesParSecondes        = 0 ; 
+  int sleepTime                       = 0; // temps de veille dans la boucle principale
   int tempsDanalyse                   = 0;  
   int t0                              = time(NULL); // Timestamp du début de programme
   
   /* EXECUTION DE PROGRAMMES EXTERNES */
+  int pid_pl_gui_monitor              = 0;
+  int pid_pl_csv_logger               = 0;
   char commande[TAILLE_COMMANDE]; // pour les commandes à lancer via system ou via popen
   int architecture                    = 0; // pl_gui_monitor est différent suivant que l'on ait une architecture 64 bits ou 32 bits
   
@@ -79,7 +85,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
   scanf("%d",&choixMenu);
   
   effacerEcran();
-  if(choixMenu==1){ /// CHARGEMENT D'UNE CONFIGURATION EXISTANTE :
+  if(choixMenu==1){ /// CHOIX 1 : CHARGEMENT D'UNE CONFIGURATION EXISTANTE :
     /// 1. On récupère le nombre et les noms des configurations
     nbConfigurations = nb_configurations();
     allocation_noms_configurations(nbConfigurations, &tabConfigurations);
@@ -95,19 +101,22 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
     recuperation_donnees_dynamiques(configurationChoisie, nb_circles, tabMAC, counters_names);
     afficher_configuration(configurationChoisie, tabConfigurations, racinePython, nb_circles, counters_names, tabMAC);
     
-    /// 4. On libère la mémoire prise par tabConfigurations
+    /// 4. On libère tabConfigurations
+    free(tabConfigurations);
   }
   
-  if (choixMenu == 2){ /// CREATION D'UNE NOUVELLE CONFIGURATION :
+  if (choixMenu == 2){ /// CHOIX 2 : CREATION D'UNE NOUVELLE CONFIGURATION :
     allocation_noms_configurations(1, &tabConfigurations);
     ecrire_donnees_statiques(choixMenu, 1, tabConfigurations, racinePython, &nb_circles);      
     
     allocation_dynamique_adresses_mac(nb_circles,&tabMAC);
     allocation_dynamique_noms_compteurs(nb_circles,&counters_names); 
     ecrire_donnees_dynamiques(choixMenu, nb_circles, tabMAC, counters_names);
+  
+    free(tabConfigurations);
   }
   
-  if (choixMenu == 3){ /// SUPPRIMER UNE CONFIGURATION :
+  if (choixMenu == 3){ /// CHOIX 3 : SUPPRIMER UNE CONFIGURATION :
     /// 1. On récupère le nombre et les noms des configurations
     nbConfigurations = nb_configurations();
     allocation_noms_configurations(nbConfigurations, &tabConfigurations);
@@ -139,45 +148,37 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
 	
 	system("mv configurations.txt configurations.tmp");
 	system("mv configurations.txt.tmp configurations.txt");
-	
-	free(tabMAC);
-	tabMAC=NULL;
-	for (j=0;j<nb_circles;j++){
-	  free(counters_names[j]);
-	  counters_names[j]=NULL;
-	}
-	free(counters_names);
-	counters_names=NULL;
       }
       i++;
     }
+    
+    /// 4. On libère la mémoire et renomme le fichier temporaire en configurations.txt
+    free(tabConfigurations);
+    desallocation(nb_circles, &tabMAC, &counters_names);
     system("rm configurations.txt");
     system("mv configurations.tmp configurations.txt");
+    return EXIT_SUCCESS;
   }
   
-  while (strcmp(racinePython, "") == 0)
+  if(choixMenu == 4){ /// CHOIX 4 : LANCEMENT DU PROGRAMME SANS TOUCHER AUX CONFIGURATIONS
     initialiser_chemin_python(racinePython);
+    initialiser_plugwise(racinePython,&nb_circles,&tabMAC,&counters_names);
+  }
   
-  if(choixMenu == 4)
-    initialiser_plugwise(racinePython,&nb_circles,&tabMAC);
-  
-  // Choix du "temps" d'analyse de la puissance : 
+  /** Choix du "temps" d'analyse de la puissance : */
   while (nbrAnalysesParSecondes <= 0){
     printf("Combien d'analyses par secondes voulez-vous faire ?\n");
-    // changer en nb_analyse par minutes nan ?
     scanf("%f",&nbrAnalysesParSecondes);
   }
+  
+  sleepTime = (int) ((1/nbrAnalysesParSecondes)*1000); // usleep nécessite la conversion en ms (en nombre entier)
   
   while (tempsDanalyse <= 0){
     printf("Pendant combien de temps (secondes) voulez-vous lancer l'analyse ?\n");
     scanf("%d",&tempsDanalyse);
   }
   
-  /// On créé un productivity link plugwise et l'on génère son uuid
-  
-  // system("rm -r /opt/productivity_link/plugwise_* 2> /dev/null"); 
-  // On supprime les anciens productivity link plugwise ou pas ?
-  
+  /** Création du productivity link "plugwise" */
   pld = pl_open("plugwise",2*nb_circles,(const char **) counters_names,&uuid);
   if (pld == PL_INVALID_DESCRIPTOR){
     perror("Problème lors de l'ouverture du compteur !\n");
@@ -201,7 +202,7 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
    * de décimales du compteur "compteur" et non en tant que compteur normal.
    */
   
-for (i = 0; i < nb_circles; i++){
+  for (i = 0; i < nb_circles; i++){
     ret = pl_write(pld,&decimales,2*i+1);
     if (ret == PL_FAILURE){
       perror("Erreur lors de l'écriture des \"compteurs\" statiques des décimales !\n");
@@ -209,9 +210,9 @@ for (i = 0; i < nb_circles; i++){
     }
     ret = PL_FAILURE;
   }
-
+  
   // MENU 
-
+  
   printf("Choisissez :\n");
   printf("1 pour pl_gui_monitor\n");
   printf("2 pour pl_csv_logger\n");
@@ -219,14 +220,14 @@ for (i = 0; i < nb_circles; i++){
   scanf("%d",&choixMenu);
   switch (choixMenu){
   case 1 :
-    lancement_interface_graphique_sdk(racineSDK,strUUID,&architecture);
+    lancement_interface_graphique_sdk(racineSDK,strUUID,&architecture,&pid_pl_gui_monitor);
     break; 
   case 2:
-    lancement_pl_csv_logger_sdk(racineSDK,strUUID);
+    lancement_pl_csv_logger_sdk(racineSDK,strUUID,&pid_pl_csv_logger);
     break;
   case 3 : 
-    lancement_pl_csv_logger_sdk(racineSDK,strUUID);
-    lancement_interface_graphique_sdk(racineSDK,strUUID,&architecture);
+    lancement_pl_csv_logger_sdk(racineSDK,strUUID,&pid_pl_csv_logger);
+    lancement_interface_graphique_sdk(racineSDK,strUUID,&architecture,&pid_pl_gui_monitor);
   }
   
   // Affichage d'un message d'information
@@ -249,14 +250,20 @@ for (i = 0; i < nb_circles; i++){
 	printf(".");
 	fflush(stdout);
       }
-    sleep(1);
+    usleep(sleepTime);
   }
   
   printf("Analyse finie !\n");
   
-  /// Fermeture du compteur et libération de la mémoire avant l'arrêt du programme
- 
-  desallocation(nb_circles, &tabConfigurations, &tabMAC, &counters_names);
+  /// Fermeture de pl_csv_logger, de pl_gui_monitor et du productivity link
+  if (choixMenu != 1){
+    kill(pid_pl_csv_logger,SIGINT);
+  }
+  kill(pid_pl_gui_monitor,SIGKILL);
   pl_close(pld);
+  
+  /// Libération de la mémoire avant l'arrêt du programme
+  desallocation(nb_circles, &tabMAC, &counters_names);
+  
   return EXIT_SUCCESS;
 }

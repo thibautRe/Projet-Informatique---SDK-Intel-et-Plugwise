@@ -14,6 +14,8 @@
 #define TAILLE_ADRESSE_MAC (16+1)
 #define TAILLE_NOM_COMPTEUR (200+1)
 
+#define TAILLE_PROCESSUS (30+1)
+
 typedef char NomConfiguration[TAILLE_NOM_CONFIGURATION];
 typedef char AdresseMAC[TAILLE_ADRESSE_MAC];
 

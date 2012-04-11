@@ -7,16 +7,19 @@ EXEC=plugSdk
 
 all : $(EXEC)
 
-plugSdk : plugSdk.o fonctions.o gestion_configurations.o affichage.o
+plugSdk : plugSdk.o fonctions.o gestion_configurations.o allocation_memoire.o affichage.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-plugSdk.o : plugSdk.c constantes.h fonctions.h gestion_configurations.h affichage.h
+plugSdk.o : plugSdk.c constantes.h fonctions.h gestion_configurations.h allocation_memoire.h affichage.h
 	$(CC) -c $< -D RACINE_SDK=\"$(IECSDK_ROOT)\" $(CFLAGS)
 
-fonctions.o : fonctions.c constantes.h fonctions.h
+fonctions.o : fonctions.c constantes.h fonctions.h allocation_memoire.h
 	$(CC) -c $<
 
-gestion_configurations.o : gestion_configurations.c constantes.h gestion_configurations.h
+gestion_configurations.o : gestion_configurations.c constantes.h gestion_configurations.h allocation_memoire.h
+	$(CC) -c $<
+
+allocation_memoire.o : allocation_memoire.c constantes.h allocation_memoire.h
 	$(CC) -c $<
 
 affichage.o : affichage.c affichage.h
