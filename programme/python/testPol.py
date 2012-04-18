@@ -19,8 +19,6 @@ circle = 1   #1 ou 2
 import os
 import time
 
-
-
 port = "/dev/ttyUSB0"
 if circle == 1 :
     macadress = "000D6F0000998BF3"
