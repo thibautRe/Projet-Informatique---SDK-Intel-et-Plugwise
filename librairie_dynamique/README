@@ -1,0 +1,8 @@
+- Pour pouvoir compiler l'ESRV, il faut changer les TODO dans le makefile et peut être certaines en-tête ;
+
+- Pour appeler l'ESRV il faut faire :
+ $(ESRV_PATH)/esrv --start --library ./esrv_test_device.so --device_options "config=thibaut" 
+
+- pour lancer l'interface graphique il faut taper :
+$(PL_GUI_MONITOR_PATH)/pl_gui_monitor --process /opt/productivity_link/esrv_<uuid>/pl_config.ini &
+
