@@ -245,9 +245,10 @@ int main (int argc, char *argv[], char *arge[]){ // char *arge[] permet d'utilis
     for (i = 0; i < nb_circles; i++)
       {
 	commande_python(i,racinePython,tabMAC,commande);
-        
+    
 	puissance = (unsigned long long) (mesure_watt(commande) * ECHELLE);
-	ret = pl_write(pld,&puissance,2*i);
+    if (puissance <= 300 * ECHELLE)
+        ret = pl_write(pld,&puissance,2*i);
 	if (ret == PL_FAILURE)
 	  {
 	    perror("Erreur lors de l'écriture des compteurs !\n");
