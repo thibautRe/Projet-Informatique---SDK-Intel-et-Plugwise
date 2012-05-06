@@ -83,15 +83,15 @@ extern "C" {
   ESRV_API int open_device(PESRV, void *);
   ESRV_API int close_device(PESRV, void *);
   ESRV_API int parse_device_option_string(PESRV, void *);
-  ESRV_API int read_device_all_measurements(PESRV, void *, int);
+  //ESRV_API int read_device_all_measurements(PESRV, void *, int);
   ESRV_API int read_device_power(PESRV, void *, int);
-  ESRV_API int read_device_energy(PESRV, void *, int, int);
+  //ESRV_API int read_device_energy(PESRV, void *, int, int);
   // Optional functions' prototypes
-  ESRV_API int read_device_current(PESRV, void *, int);
-  ESRV_API int read_device_voltage(PESRV, void *, int);
-  ESRV_API int read_device_power_factor(PESRV, void *, int);
-  ESRV_API int read_device_voltage_frequency(PESRV, void *, int);
-  ESRV_API int read_device_current_frequency(PESRV, void *, int);
+  //ESRV_API int read_device_current(PESRV, void *, int);
+  //ESRV_API int read_device_voltage(PESRV, void *, int);
+  //ESRV_API int read_device_power_factor(PESRV, void *, int);
+  //ESRV_API int read_device_voltage_frequency(PESRV, void *, int);
+  //ESRV_API int read_device_current_frequency(PESRV, void *, int);
   
   /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
