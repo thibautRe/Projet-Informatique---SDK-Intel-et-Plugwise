@@ -1,0 +1,29 @@
+*********************************************************
+*		PROTOTYPE Intel Energy Checker & Plugwise		*
+*********************************************************
+
+- Ce prototype permet d'analyser la consommation donnée par les Circles Plugwise, et de les afficher
+- sous forme graphique, ou bien de les exporter au format CSV.
+
+Pour lancer le programme d'analyse de la consommation, lancer les commandes suivantes :
+	$ cd <répertoirePrototype>/src
+	$ make
+	$ ./plugSdk
+
+Avant de compiler : 
+	- Il faut changer la variable IESCDK_ROOT dans le makefile ;
+	
+Avant de lancer l'application, il faut s'assurer que :
+        -	que l'utilisateur a tous les droits pour ouvrir et modifier
+		le répertoire /opt/productivity_link
+
+	-	avoir fait un sudo ls ou n'importe quoi pour que le mot de passe soit mémorisé
+		dans la console.
+	
+	-	le répertoire <chemin_repertoire_installation>/build/linux/
+		soit bien inclue dans la variable LD_LIBRARY_PATH.
+	
+	- 	la commande : export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+		ait été effectuée.
+		
+
