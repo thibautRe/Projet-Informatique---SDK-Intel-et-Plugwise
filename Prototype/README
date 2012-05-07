@@ -5,25 +5,45 @@
 - Ce prototype permet d'analyser la consommation donnée par les Circles Plugwise, et de les afficher
 - sous forme graphique, ou bien de les exporter au format CSV.
 
-Pour lancer le programme d'analyse de la consommation, lancer les commandes suivantes :
-	$ cd <répertoirePrototype>/src
-	$ make
-	$ ./plugSdk
+# COMPILATION DU SDK :
+# Lien vers notre Wiki moodle : http://moodle.it-sudparis.eu/mod/wiki/view.php?pageid=237
 
-Avant de compiler : 
-	- Il faut changer la variable IESCDK_ROOT dans le makefile ;
-	
-Avant de lancer l'application, il faut s'assurer que :
-        -	que l'utilisateur a tous les droits pour ouvrir et modifier
-		le répertoire /opt/productivity_link
+# INSTRUCTION DE COMPILATION / D'EXECUTION :
+# * Avant de compiler : 
+#	- 	Il faut changer la variable IESCDK_ROOT dans le makefile ;
+#	
+# * Avant de lancer l'application, il faut s'assurer que :
+#        -	que l'utilisateur a tous les droits pour ouvrir et modifier
+#		le répertoire /opt/productivity_link
+#
+#	-	avoir fait un sudo ls ou n'importe quoi pour que le mot de passe soit mémorisé
+#		dans la console.
+#	
+#	-	le répertoire <chemin_repertoire_installation>/build/linux/
+#		soit bien inclue dans la variable LD_LIBRARY_PATH.
+#	
+#	- 	la commande : export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+#		ait été effectuée.
+#
+# * Pour lancer le programme d'analyse de la consommation, lancer les commandes suivantes :
+#	$ cd <répertoirePrototype>/src
+#	$ make
+#	$ ./plugSdk
 
-	-	avoir fait un sudo ls ou n'importe quoi pour que le mot de passe soit mémorisé
-		dans la console.
-	
-	-	le répertoire <chemin_repertoire_installation>/build/linux/
-		soit bien inclue dans la variable LD_LIBRARY_PATH.
-	
-	- 	la commande : export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-		ait été effectuée.
-		
 
+# FONCTIONNEMENT DE PLUGSDK :
+#
+# * Etape 1 : gestion de configuration
+#   Choix entre chargement, création ou suppression de configuration.
+#
+# * Etape 2 : données temporelles
+#   a. Choix de la fréquence de mesure ;
+#   b. Choix du temps d'analyse (petit bug).
+#
+# * Etape 3 : lancement du/des logiciel(s)
+# Choix entre l'affichage graphique en temps réel (pl_gui_monitor),
+# l'enregistrement des données (pl_csv_logger) ou les 2.
+#
+# * Etape 4 : finalisation
+# Attention ! Il faut bien attendre que le programme s'arrête de lui-même si l'on utilise pl_csv_logger 
+# sinon le fichier .csv risque d'être illisible.
