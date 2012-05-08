@@ -1,6 +1,8 @@
-Faisable avec le IecSDK :
-    (voir iecsdk/doc/FAQ.pdf * Question 8)
-    - Créer des compteurs pour surveiller des applications
-    -   
+POLE SDK :
+     - finir la conversion de la librairie dynamique ;
+     - finir la traduction totale du code ;
+     - intégration de la documentation doxygen.
+POLE POL :
+     - convertir pol.py en pol.c (le tout en anglais) ;
+     - intégrer des commentaires en doxygen.
 
-- iecsdk/doc/FAQ.pdf * Question 37 ----> Relier iecsdk et plugwise
