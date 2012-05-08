@@ -1,1 +1,27 @@
-Test ok ?
+# GitHub du PI de l'équipe Plugwise / Intel Energy Checker de Telecom SudParis
+
+* conversion
+Ce dossier contient le programme python pol.py 
+converti en langage c pol.c.
+
+* hello_world
+C'est le hello_world du SDK.
+On voit comment créer un productivity link
+et des compteurs.
+On apprend aussi à écrire dedans.
+
+* librairie dynamique
+Programme utilisant un driver (la librairie dynamique)
+lié à l'esrv du SDK.
+
+* programme
+Contient le programme plugSdk.
+Ce dernier permet de lancer automatiquement les analyses,
+l'affichage graphique et l'enregistrement des données.
+
+* Prototype
+Prototype du projet informatique.
+
+* rapport
+Dossier contenant le pré-rapport
+et le rapport du projet informatique.
