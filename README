@@ -10,9 +10,9 @@ On voit comment créer un productivity link
 et des compteurs.
 On apprend aussi à écrire dedans.
 
-* librairie dynamique
-Programme utilisant un driver (la librairie dynamique)
-lié à l'esrv du SDK.
+* dynamic_library
+Programme which use a driver (the dynamic library)
+linked to the SDK ESRV.
 
 * programme
 Contient le programme plugSdk.

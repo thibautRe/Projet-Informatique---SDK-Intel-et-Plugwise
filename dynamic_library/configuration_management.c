@@ -4,7 +4,7 @@ int nb_configurations(void){
   
   FILE* configurations    = NULL;
   int nbConfigurations	= 0;
-  char buffer[size_buffer];
+  char buffer[BUFFER_SIZE];
   
   configurations = fopen("configurations.txt","r");
   if (configurations == NULL){
@@ -13,17 +13,17 @@ int nb_configurations(void){
   }   
   /** The file configurations.txt has as many rows as configurations.
   * so a line is a configuration and we read it as follows:
-   * configuration_name rootSDK rootPython nb_circles MACadress1 MACadress2 etc.
+   * configuration_name rootSDK rootPython nb_circles MACaddress1 MACaddress2 etc.
    */
-  while (fgets(tampon, size_buffer, configurations) != NULL){
+  while (fgets(buffer, BUFFER_SIZE, configurations) != NULL){
     /** we jump the line :
      * <ul>
      *  <li> corresponding to MAC adress ; </li>
      *  <li> corresponding to the counters names </li>
      * </ul>
      */
-    fgets(tampon, size_buffer, configurations);
-    fgets(tampon, size_buffer, configurations);
+    fgets(buffer, BUFFER_SIZE, configurations);
+    fgets(buffer, BUFFER_SIZE, configurations);
     
     nbConfigurations++;
   }
@@ -53,7 +53,7 @@ void save_configurations_names(int nbConfigurations, ConfigurationName tabConfig
   
   int i                = 0 ;
   FILE* configurations = NULL;
-  char buffer[size_buffer];
+  char buffer[BUFFER_SIZE];
   
   configurations = fopen("configurations.txt","r");
   if (configurations == NULL){
@@ -63,11 +63,11 @@ void save_configurations_names(int nbConfigurations, ConfigurationName tabConfig
   
   while (i < nbConfigurations){
     fscanf(configurations,"%s",tabConfigurations[i]);
-    fgets(buffer, size_buffer , configurations); // to return to the end of the line
+    fgets(buffer, BUFFER_SIZE , configurations); // to return to the end of the line
     
     // we jump the two unuseful lines
-    fgets(buffer, size_buffer, configurations);
-    fgets(buffer, size_buffer, configurations);
+    fgets(buffer, BUFFER_SIZE, configurations);
+    fgets(buffer, BUFFER_SIZE, configurations);
     
     i++;
   }
@@ -111,7 +111,7 @@ void static_data_recovery(int MenuChoice, int configurationChosen, Configuration
   
   int i                = 1 ; // we start reading from the first line
   FILE* configurations = NULL;
-  char buffer[size_buffer];
+  char buffer[BUFFER_SIZE];
   
   configurations = fopen("configurations.txt","r");
   if (configurations == NULL){
@@ -119,30 +119,30 @@ void static_data_recovery(int MenuChoice, int configurationChosen, Configuration
     return exit(EXIT_FAILURE);
   }   
   
-  while(i < configurationChoisie){ // to stop at the beguining of the line we want to read
-    fgets(buffer, size_buffer, configurations);
-    fgets(buffer, size_buffer, configurations); 
-    fgets(buffer, size_buffer, configurations);
+  while(i < configurationChosen){ // to stop at the beguining of the line we want to read
+    fgets(buffer, BUFFER_SIZE, configurations);
+    fgets(buffer, BUFFER_SIZE, configurations); 
+    fgets(buffer, BUFFER_SIZE, configurations);
     i++; 
   }
   
   if(MenuChoice ==2){
-    fscanf(configurations,"%s %s %d", tabConfigurations[configurationChoisie-1], rootPython, nb_circles);
+    fscanf(configurations,"%s %s %d", tabConfigurations[configurationChosen-1], rootPython, nb_circles);
   }
   else
     fscanf(configurations,"%s %s %d",buffer,rootPython, nb_circles);
   
-  fgets(buffer, size_buffer, configurations);
+  fgets(buffer, BUFFER_SIZE, configurations);
   
   rewind(configurations);
   fclose(configurations);
 }
 
-void dynamic_data_recovery(int configurationChosen, int nb_circles, MACadress tabMAC[],char **counters_names){
+void dynamic_data_recovery(int configurationChosen, int nb_circles, MACaddress tabMAC[],char **counters_names){
   
   int i                = 1 ; // we start reading from the first line
   FILE* configurations = NULL;
-  char buffer[size_buffer];
+  char buffer[BUFFER_SIZE];
   
   configurations = fopen("configurations.txt","r");
   if (configurations == NULL){
@@ -150,20 +150,20 @@ void dynamic_data_recovery(int configurationChosen, int nb_circles, MACadress ta
     return exit(EXIT_FAILURE);
   }   
 
-  while(i < configurationChoisie){ // to stop at the beguining of the line we want to read
-    fgets(buffer, size_buffer, configurations);
-    fgets(buffer, size_buffer, configurations); 
-    fgets(buffer, size_buffer, configurations);
+  while(i < configurationChosen){ // to stop at the beguining of the line we want to read
+    fgets(buffer, BUFFER_SIZE, configurations);
+    fgets(buffer, BUFFER_SIZE, configurations); 
+    fgets(buffer, BUFFER_SIZE, configurations);
     i++; 
   }
   
-  fgets(buffer, size_buffer, configurations); // we jump the line which corresponds to the dynamic data
+  fgets(buffer, BUFFER_SIZE, configurations); // we jump the line which corresponds to the dynamic data
   
   // Circles Mac adress
   for (i=0 ; i < nb_circles ; i++){
     fscanf(configurations,"%s ",tabMAC[i]); 
   }
-  //  fgets(buffer, size_buffer, configurations); // it goes to line
+  //  fgets(buffer, BUFFER_SIZE, configurations); // it goes to line
   
   // counters names
   for (i=0 ; i < nb_circles ; i++){
@@ -176,12 +176,12 @@ void dynamic_data_recovery(int configurationChosen, int nb_circles, MACadress ta
 }
 
 
-void afficher_configuration(int configurationChoisie, NomConfiguration tabConfigurations[], char racinePython[], int nb_circles, char** counters_names, AdresseMAC tabMAC[]){
+void configuration_display(int configurationChosen, ConfigurationName tabConfigurations[], char racinePython[], int nb_circles, char** counters_names, MACaddress tabMAC[]){
   
   int i;  
   
   printf("Here is your configuration :\n");
-  printf("Configuration's name: %s\n",tabConfigurations[configurationChoisie-1] );
+  printf("Configuration's name: %s\n",tabConfigurations[configurationChosen-1] );
   printf("Root Python : %s\n",racinePython);
   printf("Number of circles : %d\n",nb_circles);
   printf("Elements that you want to measure power :\n");
@@ -194,7 +194,7 @@ void write_static_data(int MenuChoice, int nbConfigurations, ConfigurationName t
   
   FILE* configurations = NULL;
   
-  if (choixMenu == 2){
+  if (MenuChoice == 2){
     printf("How do you want to call your configuration?\n");
     printf("Configuration's name : ");
     scanf("%s",tabConfigurations[nbConfigurations-1]);
@@ -220,7 +220,7 @@ void write_static_data(int MenuChoice, int nbConfigurations, ConfigurationName t
   fclose(configurations);
 }
 
-void write_dynamic_data(int MenuChoice, int nb_circles, MACadress tabMAC[], char **counters_names){
+void write_dynamic_data(int MenuChoice, int nb_circles, MACaddress tabMAC[], char **counters_names){
   
   int i                = 0;
   FILE* configurations = NULL;
@@ -233,7 +233,7 @@ void write_dynamic_data(int MenuChoice, int nb_circles, MACadress tabMAC[], char
     }
     sprintf(counters_names[2*i+1],"%s.decimals",counters_names[2*i]);
     
-    if(choixMenu ==2){
+    if(MenuChoice ==2){
       printf(" * Mac adress is %s : ",counters_names[2*i]);
       scanf("%s",tabMAC[i]);
     }

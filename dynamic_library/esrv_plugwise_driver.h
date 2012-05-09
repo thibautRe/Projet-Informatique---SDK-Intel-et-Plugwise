@@ -6,8 +6,8 @@
 //-----------------------------------------------------------------------------
 #include "pub_esrv.h"
 //#include "pub_esrv_counters.h"
-#include "gestion_configurations.h"
-#include "allocation_memoire.h"
+#include "configuration_management.h"
+#include "memory_allocation.h"
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -40,7 +40,7 @@ extern "C" {
   // general definitions
   //-----------------------------------------------------------------------------
 #define __PL_LINUX__
-#include "constantes.h"
+#include "constants.h"
 #define RACINE_SDK  "/home/telecom_sudparis/projet_informatique/iecsdk"
   //-----------------------------------------------------------------------------
   // messages definitions
@@ -56,19 +56,19 @@ extern "C" {
     //-----------------------------------------------------------------------------
     /* CONFIGURATION */
     int nbConfigurations;
-    NomConfiguration *tabConfigurations;
+    ConfigurationName *tabConfigurations;
     int configurationChoisie;
     int nb_circles;
-    char racineSDK[TAILLE_RACINE];
-    char racinePython[TAILLE_RACINE];
-    AdresseMAC *tabMAC;
+    char racineSDK[ROOT_SIZE];
+    char racinePython[ROOT_SIZE];
+    MACaddress *tabMAC;
     char **counters_names;
     
     /* TEMPS D'EXECUTION DU PROGRAMME */
     float nbrAnalysesParSecondes;
     
     /* EXECUTION DE PROGRAMMES EXTERNES */
-    char commande[TAILLE_COMMANDE]; // pour les commandes à lancer via system ou via popen
+    char commande[ORDER_SIZE]; // pour les commandes à lancer via system ou via popen
     
     /* MENU */
     int choixMenu;

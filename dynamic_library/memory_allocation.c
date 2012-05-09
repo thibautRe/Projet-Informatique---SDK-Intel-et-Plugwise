@@ -1,7 +1,7 @@
-#include "Memory_allocation.h"
+#include "memory_allocation.h"
 
-void mac_adress_dynamic_allocation(int nb_circles, MACadress *tabMAC[]){
-  *tabMAC = malloc((nb_circles)*sizeof(MACadress)) ;
+void mac_adress_dynamic_allocation(int nb_circles, MACaddress *tabMAC[]){
+  *tabMAC = malloc((nb_circles)*sizeof(MACaddress)) ;
   if(*tabMAC==NULL){
     perror("Memory allocation problem !\n");
     return exit(EXIT_FAILURE);
@@ -18,7 +18,7 @@ void counters_names_dynamic_allocation(int nb_circles, char ***counters_names){
   }
   
   for (i=0 ; i < 2*nb_circles ; i++){
-    (*counters_names)[i] = malloc(TAILLE_NOM_COMPTEUR*sizeof(char));
+    (*counters_names)[i] = malloc(COUNTER_NAME_SIZE*sizeof(char));
     if ((*counters_names)[i] == NULL){
       perror("Erreur du malloc \n");
       return exit(EXIT_FAILURE);
@@ -26,7 +26,7 @@ void counters_names_dynamic_allocation(int nb_circles, char ***counters_names){
   }
 }
 
-void deallocation(int nb_circles, MACadress *tabMAC[], char ***counters_names){
+void deallocation(int nb_circles, MACaddress *tabMAC[], char ***counters_names){
   int i;
   
   free(*tabMAC);

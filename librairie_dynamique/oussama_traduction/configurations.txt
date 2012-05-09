@@ -1,6 +1,0 @@
-modele_configuration /racinePOL nb_circles
-adresseMAC1 adresseMAC2 etc.
-nomCircle1 nomCircle2 etc.
-thibaut /home/thibaut/Projet_Info/programme/python 1
-000D6F0000998BF3 
-circle_thib

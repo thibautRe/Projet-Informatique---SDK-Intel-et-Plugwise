@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "constantes.h"
-#include "Memory_allocation.h"
+#include "constants.h"
+#include "memory_allocation.h"
 
 int nb_configurations(void);
 void allocation_configurations_names(int nbConfigurations, ConfigurationName *tabConfigurations[]);
@@ -17,11 +17,11 @@ int configuration_choice_parsing(int nbConfigurations, char *token, Configuratio
 
 void static_data_recovery(int MenuChoice, int configurationChoisie, ConfigurationName tabConfigurations[], char rootPython[], int *nb_circles);
 
-void dynamic_data_recovery(int configurationChosen, int nb_circles, MACadress tabMAC[],char **counters_names);
+void dynamic_data_recovery(int configurationChosen, int nb_circles, MACaddress tabMAC[],char **counters_names);
 
-void configuration_display(int configurationchosen, ConfigurationName tabConfigurations[], char rootPython[], int nb_circles, char ** counters_names, MACadress tabMAC[]);
+void configuration_display(int configurationChosen, ConfigurationName tabConfigurations[], char rootPython[], int nb_circles, char ** counters_names, MACaddress tabMAC[]);
 
 void write_static_data(int MenuChoice, int nbConfigurations, ConfigurationName tabConfigurations[], char rootPython[], int *nb_circles);
-void write_dynamic_data(int MenuChoice, int nb_circles, MACadress tabMAC[], char **counters_names);
+void write_dynamic_data(int MenuChoice, int nb_circles, MACaddress tabMAC[], char **counters_names);
 
 #endif

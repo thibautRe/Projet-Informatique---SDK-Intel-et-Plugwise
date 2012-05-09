@@ -31,13 +31,13 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h> // sleep
-#include "constantes.h"
+#include "constants.h"
 /**
  * Il faut inclure les fichiers .h des fonctions que l'on aura codé pour communiquer avec le "stick" (Plugwise).
  */
 #include "pub_esrv.h"
 //#include "pub_esrv_counters.h"
-#include "esrv_test_device_dynamic_library.h"
+#include "esrv_plugwise_driver.h"
 
 #ifdef __PL_WINDOWS__
 // TODO: add here Windows specific header inclusions 
@@ -123,8 +123,8 @@ ESRV_API int init_device_extra_data(PESRV p) {
     /** CHARGEMENT D'UNE CONFIGURATION PLUGWISE : */
     /// 1. On récupère le nombre et les noms des configurations
     px->nbConfigurations = nb_configurations();
-    allocation_noms_configurations(px->nbConfigurations, &(px->tabConfigurations));
-    enregistrer_noms_configurations(px->nbConfigurations,px->tabConfigurations);
+    allocation_configurations_names(px->nbConfigurations, &(px->tabConfigurations));
+    save_configurations_names(px->nbConfigurations,px->tabConfigurations);
     
     //---------------------------------------------------------------------
     // Set the f_hw_energy_integration_provided flag if the device can 
@@ -194,11 +194,11 @@ ESRV_API int init_device_extra_data(PESRV p) {
     
     /// 3. On récupère les données de la configuration
     pd->choixMenu=1;
-    recuperation_donnees_statiques(pd->choixMenu,pd->configurationChoisie, pd->tabConfigurations, pd->racinePython,&(pd->nb_circles));
-    allocation_dynamique_adresses_mac(pd->nb_circles,&(pd->tabMAC));
-    allocation_dynamique_noms_compteurs(pd->nb_circles,&(pd->counters_names)); 
-    recuperation_donnees_dynamiques(pd->configurationChoisie,pd->nb_circles,pd->tabMAC,pd->counters_names);
-    afficher_configuration(pd->configurationChoisie,pd->tabConfigurations,pd->racinePython,pd->nb_circles,pd->counters_names,pd->tabMAC);
+    static_data_recovery(pd->choixMenu,pd->configurationChoisie, pd->tabConfigurations, pd->racinePython,&(pd->nb_circles));
+    mac_adress_dynamic_allocation(pd->nb_circles,&(pd->tabMAC));
+    counters_names_dynamic_allocation(pd->nb_circles,&(pd->counters_names)); 
+    dynamic_data_recovery(pd->configurationChoisie,pd->nb_circles,pd->tabMAC,pd->counters_names);
+    configuration_display(pd->configurationChoisie,pd->tabConfigurations,pd->racinePython,pd->nb_circles,pd->counters_names,pd->tabMAC);
     
     p->device_data.virtual_devices = pd->nb_circles ;
     /// 4. On libère tabConfigurations
@@ -339,7 +339,7 @@ ESRV_API int read_device_power(PESRV p, void *px, int vd) {
   
   // Get back of the pol.py's data
   FILE *pp = NULL;
-  char tampon[TAILLE_TAMPON];
+  char tampon[BUFFER_SIZE];
   double puissance;
   
   printf("5-N. Read device power\n");
@@ -386,7 +386,7 @@ ESRV_API int read_device_power(PESRV p, void *px, int vd) {
   pclose(pp);
   tampon[strlen (tampon) - 1] = '\0';
   puissance = atof(tampon);
-  if (puissance <= PUISSANCE_MAX)
+  if (puissance <= MAX_POWER)
     p->double_power= (double) puissance;
   printf("vd %d : %f watt\n",vd,puissance);
   
@@ -455,7 +455,7 @@ ESRV_API int parse_device_option_string(PESRV p, void *pd) {
   char *token_delimiter      = " ";
   char *sub_token_delimiter  = "=";
   
-  char buffer[TAILLE_TAMPON] = "";
+  char buffer[BUFFER_SIZE] = "";
   
   printf("2. Parse device option string\n");
   // pd can be NULL if not required by device
@@ -481,7 +481,7 @@ ESRV_API int parse_device_option_string(PESRV p, void *pd) {
   // dans sub_token se trouve le nom de la configuration
   
   printf("nb config : %d\n",px->nbConfigurations);
-  px->configurationChoisie = choix_configuration_parsing(px->nbConfigurations,sub_token,px->tabConfigurations);
+  px->configurationChoisie = configuration_choice_parsing(px->nbConfigurations,sub_token,px->tabConfigurations);
   printf("Configuration choisie : %d\n",px->configurationChoisie);  
   
   return(ESRV_SUCCESS);
