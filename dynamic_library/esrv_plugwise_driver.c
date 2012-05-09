@@ -1,5 +1,5 @@
 /**
- * \file esrv_template_device_dynamic_library.c
+ * \file esrv_plugwise_driver.c
  * \brief Le modèle de fichier à coder pour construire la librairie dynamique
  * du device/ dispositif Plugwise (communication avec le "Stick").
  *

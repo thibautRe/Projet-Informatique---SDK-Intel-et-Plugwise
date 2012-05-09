@@ -1,5 +1,21 @@
+/**
+ * \file memory_allocation.c
+ * \brief These functions permits to (de)allocate memory.
+ *
+ * \author The PlugSdk team of Télécom SudParis
+ * \version 0.2
+ * \date May 9th 2012
+ */
 #include "memory_allocation.h"
 
+/**
+ * \fn mac_adress_dynamic_allocation(int nb_circles, MACaddress *tabMAC[]){
+ * 
+ * \brief Dynamic allocation of the MAC addresses table.
+ *
+ * \param[in] int number of circles
+ * \param[in,out] MACaddress table of MAC addresses
+ */
 void mac_adress_dynamic_allocation(int nb_circles, MACaddress *tabMAC[]){
   *tabMAC = malloc((nb_circles)*sizeof(MACaddress)) ;
   if(*tabMAC==NULL){
@@ -8,6 +24,14 @@ void mac_adress_dynamic_allocation(int nb_circles, MACaddress *tabMAC[]){
   }
 }
 
+/**
+ * \fn counters_names_dynamic_allocation(int nb_circles, char ***counters_names)
+ * 
+ * \brief Dynamic allocation of the counters names table
+ *
+ * \param[in] int number of circles
+ * \param[in,out] char*** Pointer to a table of counters names
+ */
 void counters_names_dynamic_allocation(int nb_circles, char ***counters_names){
   int i;
   
@@ -26,6 +50,16 @@ void counters_names_dynamic_allocation(int nb_circles, char ***counters_names){
   }
 }
 
+/**
+ * \fn deallocation(int nb_circles, MACaddress *tabMAC[], char ***counters_names){
+ * 
+ * \brief Deallocation of the memory used by the table of MAC addresses and by the 
+ * table of counters names.
+ *
+ * \param[in] int number of circles
+ * \param[in,out] MACaddress table of MAC addresses
+ * \param[in,out] char*** Pointer to a table of counters names
+ */
 void deallocation(int nb_circles, MACaddress *tabMAC[], char ***counters_names){
   int i;
   
