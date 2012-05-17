@@ -1,14 +1,13 @@
 /**
  * \file esrv_plugwise_driver.c
- * \brief Le modèle de fichier à coder pour construire la librairie dynamique
- * du device/ dispositif Plugwise (communication avec le "Stick").
+ * \brief Plugwise dynamic library which permits to communicate with circles
  *
  * \author The PlugSdk team of Télécom SudParis
- * \version 0.1
- * \date 24 avril 2012
+ * \version 0.9
+ * \date May 17th 2012
  * 
- * Ce fichier permettra de créer une librairie dynamique contenant les informations
- * pour demander les informations énergétiques au "stick".
+ * This file will permit to create a dynamic library for the ESRV.
+ * It library gives to ESRV the ability to send and receive information from the "stick".
  *
  * Function call sequence by the server :
  * <ol>
@@ -17,26 +16,21 @@
  *  <li> 3/ ESRV_API int init_device_extra_data(PESRV); // second call </li>
  *  <li> 4/ ESRV_API int open_device(PESRV, void *); </li>
  *  <li> 5-N/ ESRV_API int read_device_power(PESRV, void *, int); </li>
- *  <li> .../ ESRV_API int read_device_energy(PESRV, void *, int); if available </li>
  *  <li> N+1/ ESRV_API int close_device(PESRV, void *); </li>
  *  <li> N+2/ ESRV_API int delete_device_extra_data(PESRV); </li>
  * </ol>
  */
 
-//-----------------------------------------------------------------------------
+
 // headers inclusions
-//-----------------------------------------------------------------------------
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <assert.h>
 #include <unistd.h> // sleep
 #include "constants.h"
-/**
- * Il faut inclure les fichiers .h des fonctions que l'on aura codé pour communiquer avec le "stick" (Plugwise).
- */
+
 #include "pub_esrv.h"
-//#include "pub_esrv_counters.h"
 #include "esrv_plugwise_driver.h"
 
 #ifdef __PL_WINDOWS__
@@ -54,8 +48,8 @@
  * \fn init_device_extra_data(PESRV p)
  * \brief initialize the device's extra data set.
  * \param[in,out] PESRV Pointeur vers une structure de données esrv.
- * \return ESRV_SUCCESS code de statut : ok.
- * \return ESRV_FAILURE code de statut : erreur.
+ * \return ESRV_SUCCESS status code: ok.
+ * \return ESRV_FAILURE status code: erreur.
  */
 ESRV_API int init_device_extra_data(PESRV p) {
   /**
@@ -72,25 +66,24 @@ ESRV_API int init_device_extra_data(PESRV p) {
   }
   
   if(f_first_init_call == 0){
-    printf("1. First call initialize device extra data\n");
-    //---------------------------------------------------------------------
-    // first call from driver - before device option string parsing
-    //---------------------------------------------------------------------
+    /// <h1>I - First call from driver - before device option string parsing</h1>
     memset(&data,0,sizeof(DEVICE_DATA));
     px = (void *)&data;
     
-    //---------------------------------------------------------------------
-    // Add all initializations the device may require.  Add
-    // the additional data into the definition of the DEVICE_DATA
-    // structure (defined in template_device_dynamic_library.h file).
-    // Use statically allocated data or dynamically allocated data.
-    // If the data is dynamically allocated, then it can be done either
-    // at first or second call of this function.  If using dynamically 
-    // allocated data, it *must* be de-allocated at program end.  There
-    // is an opportunity to do so in the delete_template_device_extra_data
-    // function which is called at the server's end.
-    //---------------------------------------------------------------------
+    /** 
+     * Add all initializations the device may require.  Add
+     * the additional data into the definition of the DEVICE_DATA
+     * structure (defined in template_device_dynamic_library.h file). 
+     *
+     * Use statically allocated data or dynamically allocated data.
+     * If the data is dynamically allocated, then it can be done either
+     * at first or second call of this function.  If using dynamically 
+     * allocated data, it *must* be de-allocated at program end.  There
+     * is an opportunity to do so in the delete_template_device_extra_data
+     * function which is called at the server's end.
+     */
     
+    /// <h2> a. Initialization </h2>
     /* CONFIGURATION */
     px->nbConfigurations                = 0;
     px->tabConfigurations               = NULL;
@@ -109,90 +102,72 @@ ESRV_API int init_device_extra_data(PESRV p) {
     
     /* MENU */
     px->choixMenu=0;
-    //---------------------------------------------------------------------
-    // Set the default virtual device count (1 based).  If the device
-    // integrates 3 independent power readers sharing the same interface 
-    // (source), then set this variable (virtual_devices) to 3.
-    // Later on, the server will use this information to query each virtual
-    // device independently, by providing the virtual device's id (0 based)
-    // in the call to the read_device_power function.
-    //---------------------------------------------------------------------
+    /** 
+     * Set the default virtual device count (1 based).  If the device
+     * integrates 3 independent power readers sharing the same interface 
+     * (source), then set this variable (virtual_devices) to 3.
+     * Later on, the server will use this information to query each virtual
+     *  device independently, by providing the virtual device's id (0 based)
+     * in the call to the read_device_power function.
+     */ 
     p->device_data.virtual_devices = 1 ;
-    // the number of virtual devices is changed between the first and second call, during the parsing function
+    /// The number of virtual devices is changed between the first and second call, during the parsing function
     
-    /** CHARGEMENT D'UNE CONFIGURATION PLUGWISE : */
-    /// 1. On récupère le nombre et les noms des configurations
+    /// <h2> b. Plugwise configuration loading </h2>
+    /// * On récupère le nombre et les noms des configurations </h3>
     px->nbConfigurations = nb_configurations();
     allocation_configurations_names(px->nbConfigurations, &(px->tabConfigurations));
     save_configurations_names(px->nbConfigurations,px->tabConfigurations);
     
-    //---------------------------------------------------------------------
-    // Set the f_hw_energy_integration_provided flag if the device can 
-    // provide  hardware power integration.  If this flag is set, then 
-    // read_device_energy is called at the update frequency (1Hz by default)
-    // by the server.  As for the read_device_power function, the virtual
-    // device's id is provided during the read_device_energy function.
-    //---------------------------------------------------------------------
-    // TODO: position the f_hw_energy_integration_provided flag
+    /*
+     * Set the f_hw_energy_integration_provided flag if the device can 
+     * provide  hardware power integration.  If this flag is set, then 
+     * read_device_energy is called at the update frequency (1Hz by default)
+     * by the server.  As for the read_device_power function, the virtual
+     * device's id is provided during the read_device_energy function.
+     */
     p->f_hw_energy_integration_provided = 0;
     
-    //---------------------------------------------------------------------
-    // Link of the data structure into the server's data structure
-    //---------------------------------------------------------------------
+    
+    /// (Link of the data structure into the server's data structure before the parsing function)
     p->device_data.p_device_data = (void *)&data;
     
-    //---------------------------------------------------------------------
-    // a library supported device may use a proprietary interface to 
-    // communicate with the server (for example the Yokogawa WT500 uses a 
-    // modified TCP/IP interface).  In this case, the device - in the 
-    // init_device_extra_data library function - sets the device_interface 
-    // to ESRV_DEVICE_INTERFACE_PROPRIETARY, overwriting the default 
-    // ESRV_DEVICE_INTERFACE_SERIAL. It is then the device's responsibility
-    // to manage its interface.  This is done in the open_device and 
-    // close_device functions.  Note that the device can still use the 
-    // interface_options to collect device specific options (and therefore
-    // allow for the proprietary interface configuration).
-    //---------------------------------------------------------------------
+    /* a library supported device may use a proprietary interface to 
+     * communicate with the server (for example the Yokogawa WT500 uses a 
+     * modified TCP/IP interface).  In this case, the device - in the 
+     * init_device_extra_data library function - sets the device_interface 
+     * to ESRV_DEVICE_INTERFACE_PROPRIETARY, overwriting the default 
+     * ESRV_DEVICE_INTERFACE_SERIAL. It is then the device's responsibility
+     * to manage its interface.  This is done in the open_device and 
+     * close_device functions.  Note that the device can still use the 
+     * interface_options to collect device specific options (and therefore
+     * allow for the proprietary interface configuration). */
     p->device_interface = ESRV_DEVICE_INTERFACE_PROPRIETARY;
     
-    //---------------------------------------------------------------------
     // Set the first call flag to 1.  This flag is used to distinguish 
     // the first from the second call in this function.
-    //---------------------------------------------------------------------
     f_first_init_call = 1;
     
   } else {
-    printf("3. Second call initialize device extra data\n");
-    
-    //---------------------------------------------------------------------
-    // Second call from the driver - post device option string parsing
-    //---------------------------------------------------------------------
-    
-    //---------------------------------------------------------------------
-    // Add all additional initializations the device may require.  Add
-    // the additional data into the definition of the DEVICE_DATA
-    // structure (defined in template_device_dynamic_library.h file).
-    // Use statically allocated data or dynamically allocated data.
-    // If using dynamically allocated data, it *must* be de-allocated at 
-    // program end.
-    // There is an opportunity to do so in the 
-    // delete_template_device_extra_data function which is called at the 
-    // server's end.
-    //---------------------------------------------------------------------
+    /// <h1> II - Second call from the driver - post device option string parsing </h1>
+    /** 
+     * Add all additional initializations the device may require.  Add
+     * the additional data into the definition of the DEVICE_DATA
+     * structure (defined in template_device_dynamic_library.h file).
+     * Use statically allocated data or dynamically allocated data.
+     * If using dynamically allocated data, it *must* be de-allocated at 
+     * program end.
+     * There is an opportunity to do so in the 
+     * delete_template_device_extra_data function which is called at the 
+     * server's end.
+     */ 
     
     PDEVICE_DATA pd = NULL;  
     pd = (void *)&data;
     if (pd == NULL){
       goto init_device_extra_data_error;
     }
-    
-    /** CHARGEMENT D'UNE CONFIGURATION PLUGWISE : SUITE */
-    /// (1. On récupère le nombre et les noms des configurations)
-    // Effectué lors du premier appel
-    /// (2. L'utilisateur choisi sa configuration)
-    // configurationChoisie est modifiée lors du parsing
-    
-    /// 3. On récupère les données de la configuration
+    /// * On récupère les données de la configuration </h3>
     pd->choixMenu=1;
     static_data_recovery(pd->choixMenu,pd->configurationChoisie, pd->tabConfigurations, pd->racinePython,&(pd->nb_circles));
     mac_adress_dynamic_allocation(pd->nb_circles,&(pd->tabMAC));
@@ -201,7 +176,7 @@ ESRV_API int init_device_extra_data(PESRV p) {
     configuration_display(pd->configurationChoisie,pd->tabConfigurations,pd->racinePython,pd->nb_circles,pd->counters_names,pd->tabMAC);
     
     p->device_data.virtual_devices = pd->nb_circles ;
-    /// 4. On libère tabConfigurations
+    /// * On libère tabConfigurations </h3>
     free(pd->tabConfigurations);
   }    
   
@@ -214,8 +189,8 @@ ESRV_API int init_device_extra_data(PESRV p) {
  * \fn delete_device_extra_data(PESRV p)
  * \brief free the device's dynamically allocated data
  * \param[in] Pointeur vers une structure de données ESRV
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code statut erreur.
+ * \return ESRV_SUCCESS : status code: ok.
+ * \return ESRV_FAILURE : status code: ok.
  *
  * This function is called at the end of the server's run.  It is the
  * right location to de-allocate any dynamically allocated data used by
@@ -249,8 +224,6 @@ ESRV_API int delete_device_extra_data(PESRV p) {
  * to work.
  */
 ESRV_API int open_device(PESRV p, void *px) {
-  
-  printf("4. Open device\n");
   // px can be NULL if not required by device
   if(!p) { 
     goto open_device_error; 
@@ -258,10 +231,7 @@ ESRV_API int open_device(PESRV p, void *px) {
   
   // TODO: add the device's open code here
   
-  // On indique le port série du stick Plugwise (par exemple /dev/ttyUSB0)
-  // Ok en utilisant la libc faite par Nicolas et Thibaut sinon pas possible avec pol.py
-  
-  // On s'assure que le matériel est bien allumé ? ou pas ?
+  // Assert material is actually functionning. 
   // system(`python ***/pol0.2_sources/pol.py -o <macaddresse>);
   
   return(ESRV_SUCCESS);
@@ -282,15 +252,12 @@ ESRV_API int open_device(PESRV p, void *px) {
  * specific shutdown. 
  */
 ESRV_API int close_device(PESRV p, void *px) {
-  
-  printf("coucou5 - close device\n");
   // px can be NULL if not required by device
   if(!p) { 
     goto close_device_error; 
   }
   /** Do we have to shut down the devices linked to the circles ?
-   * If we do not, this function is useless in our case.
-   */
+   * If we do not, this function is useless in our case. */
   return(ESRV_SUCCESS);
  close_device_error:
   return(ESRV_FAILURE);
@@ -306,16 +273,13 @@ ESRV_API int close_device(PESRV p, void *px) {
  * \return ESRV_FAILURE : code de statut erreur.
  */
 ESRV_API int read_device_all_measurements(PESRV p, void *px, int vd) {
-  
-  printf("5-N.  read device all \n");
+  /** This library does not use this function */
   // px can be NULL if not required by device
   if(!p) { 
     goto read_device_power_error; 
   }
-  /** 
-   * validity check on virtual device count.
-   * Note: virtual device id is 1 based (0 has a special meaning).
-   */
+  /* validity check on virtual device count.
+   * Note: virtual device id is 1 based (0 has a special meaning).*/
   if( (vd <= 0) || (vd > p->device_data.virtual_devices) ) { 
     goto read_device_power_error; 
   }
@@ -342,7 +306,6 @@ ESRV_API int read_device_power(PESRV p, void *px, int vd) {
   char tampon[BUFFER_SIZE];
   double puissance;
   
-  printf("5-N. Read device power\n");
   // px can be NULL if not required by device
   if(!p) { 
     goto read_device_power_error; 
@@ -353,27 +316,23 @@ ESRV_API int read_device_power(PESRV p, void *px, int vd) {
     goto read_device_power_error;
   }
   
-  //-------------------------------------------------------------------------
-  // validity check on virtual device count.
-  // Note: virtual device id is 1 based (0 has a special meaning)
-  //-------------------------------------------------------------------------
+  /* validity check on virtual device count.
+   * Note: virtual device id is 1 based (0 has a special meaning) */
   if((vd <= 0) || (vd > p->device_data.virtual_devices) ) { 
     goto read_device_power_error; 
   }
   
-  //-------------------------------------------------------------------------
-  // Collect the power read by the device here and return it in 
-  // (p->double_power). The (vd) integer is the id of the virtual device 
-  // queried by the server.
-  // (vd) can be any integer between 0 and the maximum virtual device number
-  // provided in the init_device_extra_data function.  By default,
-  // the max vd is equal to 0.  The power must be provided in Watts.
-  //-------------------------------------------------------------------------
+  /** Collect the power read by the device here and return it in 
+   * (p->double_power). The (vd) integer is the id of the virtual device 
+   * queried by the server.
+   * (vd) can be any integer between 0 and the maximum virtual device number
+   * provided in the init_device_extra_data function.  By default,
+   * the max vd is equal to 0.  The power must be provided in Watts. */
   
-  // Création de la commande d'appel à pol.py
+  // Creation of the pol.py call command
   sprintf(pd->commande,"sudo python %s/pol.py -w %s 2> /dev/null",pd->racinePython,pd->tabMAC[vd-1]);
   
-  // Exécution et écriture de la commande dans le "pipe"
+  // Execution and write of the command in the pipe
   pp = popen (pd->commande, "r");
   if (pp == NULL){
     perror ("popen error !");
@@ -414,13 +373,10 @@ ESRV_API int read_device_power(PESRV p, void *px, int vd) {
  * \return ESRV_FAILURE : code de statut erreur.
  */
 ESRV_API int read_device_energy(PESRV p, void *px, int vd, int s) {
-  
-  printf(".... Read device energy\n");
   // px can be NULL if not required by device
   if(!p) { 
     goto read_device_energy_error; 
   }
-  
   return(ESRV_SUCCESS);
  read_device_energy_error:
   return(ESRV_FAILURE);
@@ -456,8 +412,6 @@ ESRV_API int parse_device_option_string(PESRV p, void *pd) {
   char *sub_token_delimiter  = "=";
   
   char buffer[BUFFER_SIZE] = "";
-  
-  printf("2. Parse device option string\n");
   // pd can be NULL if not required by device
   if(!p) { 
     goto parse_device_option_string_error;	
@@ -466,23 +420,21 @@ ESRV_API int parse_device_option_string(PESRV p, void *pd) {
   ps = p->device_option_string;
   assert(ps);
   
-  /**
-   * If the user may need to provide configuration information for the device
+  /* If the user may need to provide configuration information for the device
    * then provide a parsing function of the device option string.
    * This string is pointed by the (ps) pointer.  This function can be a stub 
    * function if the device doesn't offer user accessible options.
    * These options should be defined in the DEVICE_DATA data structure, and 
-   * this function should update those options in this function.
-   */
+   * this function should update those options in this function. */
   
   token = strtok(ps,token_delimiter);
   sub_token = strtok(token,sub_token_delimiter);
   sub_token = strtok(NULL,sub_token_delimiter);
-  // dans sub_token se trouve le nom de la configuration
+  // there is the configuration name in sub_token
   
-  printf("nb config : %d\n",px->nbConfigurations);
+  printf("# number of configuration(s) : %d\n",px->nbConfigurations);
   px->configurationChoisie = configuration_choice_parsing(px->nbConfigurations,sub_token,px->tabConfigurations);
-  printf("Configuration choisie : %d\n",px->configurationChoisie);  
+  printf("# choosen configuration : %d\n",px->configurationChoisie);  
   
   return(ESRV_SUCCESS);
  parse_device_option_string_error:
