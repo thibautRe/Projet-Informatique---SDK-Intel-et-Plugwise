@@ -56,7 +56,7 @@ int main (void){ // char *arge[] permet d'utiliser les redirections avec la fonc
   // Because the source code was make for another program
   choixMenu++;
   
-  /// CHOIX 1 : CREATION D'UNE NOUVELLE CONFIGURATION :
+  /// <h2>CHOIX 1 : CREATION D'UNE NOUVELLE CONFIGURATION :</h2>
   if(choixMenu==2)
     {
       allocation_configurations_names(1, &tabConfigurations);
@@ -70,18 +70,18 @@ int main (void){ // char *arge[] permet d'utiliser les redirections avec la fonc
       deallocation(nb_circles, &tabMAC, &counters_names);
     }
   
-  /// CHOIX 2 : SUPPRIMER UNE CONFIGURATION :
+  /// <h2>CHOIX 2 : SUPPRIMER UNE CONFIGURATION :</h2>
   else
     { 
-      /// 1. On récupère le nombre et les noms des configurations
+      /// <h3>1. On récupère le nombre et les noms des configurations</h3>
       nbConfigurations = nb_configurations();
       allocation_configurations_names(nbConfigurations, &tabConfigurations);
       save_configurations_names(nbConfigurations, tabConfigurations);
       
-      /// 2. On demande à l'utilisateur de choisir la configuration à supprimer
+      /// <h3>2. On demande à l'utilisateur de choisir la configuration à supprimer</h3>
       configurationChoisie = configuration_choice(choixMenu, nbConfigurations, tabConfigurations);
       
-      /// 3. On récupère les données de la configuration
+      /// <h3>3. On récupère les données de la configuration</h3>
       system("touch configurations.tmp");
       i=1;
       while(i <= nbConfigurations){
@@ -107,7 +107,7 @@ int main (void){ // char *arge[] permet d'utiliser les redirections avec la fonc
 	i++;
       }
       
-      /// 4. On libère la mémoire et renomme le fichier temporaire en configurations.txt
+      /// <h3>4. On libère la mémoire et renomme le fichier temporaire en configurations.txt</h3>
       free(tabConfigurations);
       deallocation(nb_circles, &tabMAC, &counters_names);
       system("rm configurations.txt");

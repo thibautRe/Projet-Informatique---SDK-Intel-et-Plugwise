@@ -1,6 +1,6 @@
 /**
  * \file memory_allocation.c
- * \brief These functions permits to (de)allocate memory.
+ * \brief These functions permits to allocate and deallocate memory.
  *
  * \author The PlugSdk team of Télécom SudParis
  * \version 0.2

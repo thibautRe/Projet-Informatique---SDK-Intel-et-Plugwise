@@ -42,7 +42,7 @@ int nb_configurations(void){
    * line n+1 : CircleName1 CircleName2 etc.
    */
   while (fgets(buffer, BUFFER_SIZE, configurations) != NULL){
-    /** we jump the line :
+    /** We jump lines :
      * <ul>
      *  <li> corresponding to MAC adress ; </li>
      *  <li> corresponding to the counters names </li>
@@ -113,7 +113,7 @@ void save_configurations_names(int nbConfigurations, ConfigurationName tabConfig
 /**
  * \fn configuration_choice(int MenuChoice, int nbConfigurations, ConfigurationName tabConfigurations[])
  *
- * \brief This functions permits to return the configuration identifier
+ * \brief This function permits to return the configuration identifier
  * in order to delete or to load a configuration. Not used in the plugwise dynamic library.
  * 
  * \param[in] the menu choice identifier
