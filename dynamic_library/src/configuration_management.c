@@ -387,6 +387,7 @@ void write_dynamic_data(int MenuChoice, int nb_circles, MACaddress tabMAC[], cha
   for (i=0 ; i < nb_circles ; i++){
     fprintf(configurations,"%s ",counters_names[2*i]);
   }
+  fprintf(configurations,"\n");
   
   rewind(configurations);
   fclose(configurations);

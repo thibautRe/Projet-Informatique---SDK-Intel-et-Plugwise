@@ -27,7 +27,6 @@
 #include <assert.h>
 #include <string.h>
 #include <assert.h>
-#include <unistd.h> // sleep
 #include "constants.h"
 
 #include "pub_esrv.h"
@@ -87,21 +86,25 @@ ESRV_API int init_device_extra_data(PESRV p) {
     /* CONFIGURATION */
     px->nbConfigurations                = 0;
     px->tabConfigurations               = NULL;
-    px->configurationChoisie            = 0;
+    px->chosenConfiguration            = 0;
     px->nb_circles                      = 0;
-    sprintf(px->racineSDK,RACINE_SDK);
-    sprintf(px->racinePython,"");
+    // racine SDK ne sert à rien : A SUPPRIMER !
+    // px->racineSDK                       = "";
     px->tabMAC                          = NULL;
     px->counters_names                  = NULL; // Le nom de chaque compteurs est stocké dans un tableau de chaine de caractères 
     
-    /* TEMPS D'EXECUTION DU PROGRAMME */
+    Plugwise initPlugwise   = {"Mac address"};
+    Plugwise *pInitPlugwise = &initPlugwise; 
+    px->plugwise = pInitPlugwise;
+            
+    /* PROGRAM EXECUTION TIME */
     px->nbrAnalysesParSecondes          = 0.0 ;   
     
-    /* EXECUTION DE PROGRAMMES EXTERNES */
-    sprintf(px->commande,"");
+    // exécution de programmes externe : A SUPPRIMER !
+    // sprintf(px->commande,"");
     
     /* MENU */
-    px->choixMenu=0;
+    px->menuChoice			= 0 ;
     /** 
      * Set the default virtual device count (1 based).  If the device
      * integrates 3 independent power readers sharing the same interface 
@@ -114,7 +117,7 @@ ESRV_API int init_device_extra_data(PESRV p) {
     /// The number of virtual devices is changed between the first and second call, during the parsing function
     
     /// <h2> b. Plugwise configuration loading </h2>
-    /// * On récupère le nombre et les noms des configurations </h3>
+    /// * We get the number and configuration names
     px->nbConfigurations = nb_configurations();
     allocation_configurations_names(px->nbConfigurations, &(px->tabConfigurations));
     save_configurations_names(px->nbConfigurations,px->tabConfigurations);
@@ -147,7 +150,7 @@ ESRV_API int init_device_extra_data(PESRV p) {
     // Set the first call flag to 1.  This flag is used to distinguish 
     // the first from the second call in this function.
     f_first_init_call = 1;
-    
+    printf("call1\n");
   } else {
     /// <h1> II - Second call from the driver - post device option string parsing </h1>
     /** 
@@ -167,16 +170,17 @@ ESRV_API int init_device_extra_data(PESRV p) {
     if (pd == NULL){
       goto init_device_extra_data_error;
     }
-    /// * On récupère les données de la configuration </h3>
-    pd->choixMenu=1;
-    static_data_recovery(pd->choixMenu,pd->configurationChoisie, pd->tabConfigurations, pd->racinePython,&(pd->nb_circles));
+
+    /// *  we get data from configuration
+    pd->menuChoice = 1;
+    static_data_recovery(pd->menuChoice,pd->chosenConfiguration, pd->tabConfigurations, pd->racinePython,&(pd->nb_circles));
     mac_adress_dynamic_allocation(pd->nb_circles,&(pd->tabMAC));
     counters_names_dynamic_allocation(pd->nb_circles,&(pd->counters_names)); 
-    dynamic_data_recovery(pd->configurationChoisie,pd->nb_circles,pd->tabMAC,pd->counters_names);
-    configuration_display(pd->configurationChoisie,pd->tabConfigurations,pd->racinePython,pd->nb_circles,pd->counters_names,pd->tabMAC);
+    dynamic_data_recovery(pd->chosenConfiguration,pd->nb_circles,pd->tabMAC,pd->counters_names);
+    configuration_display(pd->chosenConfiguration,pd->tabConfigurations,pd->racinePython,pd->nb_circles,pd->counters_names,pd->tabMAC);
     
     p->device_data.virtual_devices = pd->nb_circles ;
-    /// * On libère tabConfigurations </h3>
+    /// * We free tabConfigurations </h3>
     free(pd->tabConfigurations);
   }    
   
@@ -189,16 +193,14 @@ ESRV_API int init_device_extra_data(PESRV p) {
  * \fn delete_device_extra_data(PESRV p)
  * \brief free the device's dynamically allocated data
  * \param[in] Pointeur vers une structure de données ESRV
- * \return ESRV_SUCCESS : status code: ok.
- * \return ESRV_FAILURE : status code: ok.
+ * \return ESRV_SUCCESS status code: ok.
+ * \return ESRV_FAILURE status code: ok.
  *
  * This function is called at the end of the server's run.  It is the
  * right location to de-allocate any dynamically allocated data used by
  * the device.
  */
 ESRV_API int delete_device_extra_data(PESRV p) {
-  
-  printf("3. Delete device extra data\n");
   if(!p) { 
     goto delete_device_extra_data_error; 
   }
@@ -215,8 +217,8 @@ ESRV_API int delete_device_extra_data(PESRV p) {
  * \brief Open the template device.
  * \param[in,out] PESRV Pointeur vers une structure de données esrv.
  * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur
+ * \return ESRV_SUCCESS status code: ok.
+ * \return ESRV_FAILURE status code: error.
  *
  * This function provides the opportunity to open the device.  It is also a
  * good location to perform device initializations.  This function can be a
@@ -232,8 +234,7 @@ ESRV_API int open_device(PESRV p, void *px) {
   // TODO: add the device's open code here
   
   // Assert material is actually functionning. 
-  // system(`python ***/pol0.2_sources/pol.py -o <macaddresse>);
-  
+  // send "STATUSCHANGE ON" for exemple
   return(ESRV_SUCCESS);
  open_device_error:
   return(ESRV_FAILURE);
@@ -244,8 +245,8 @@ ESRV_API int open_device(PESRV p, void *px) {
  * \brief Close the device.
  * \param[in,out] PESRV Pointeur vers une structure de données esrv
  * \param[in,out] PESRV Pointeur vers un structure de données DEVICE_DATA
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
+ * \return ESRV_SUCCESS status code: ok.
+ * \return ESRV_FAILURE status code: error.
  *
  * This function provides the opportunity to close the device. <br />
  * This function can be a stub function if the device doesn't require any 
@@ -269,8 +270,8 @@ ESRV_API int close_device(PESRV p, void *px) {
  * \param[in,out] PESRV Pointeur vers une structure de données esrv.
  * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
  * \param[in] int L'ID du périphérique virtuel (du "stick").
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
+ * \return ESRV_SUCCESS status code: ok.
+ * \return ESRV_FAILURE status code: error.
  */
 ESRV_API int read_device_all_measurements(PESRV p, void *px, int vd) {
   /** This library does not use this function */
@@ -295,16 +296,14 @@ ESRV_API int read_device_all_measurements(PESRV p, void *px, int vd) {
  * \param[in,out] PESRV Pointeur vers une structure de données esrv.
  * \param[in,out] void* Pointeur vers une structure de données DEVICE_DATA.
  * \param[in] int The virtual device's id.
- * \return ESRV_SUCCESS : code de statut ok.
- * \return ESRV_FAILURE : code de statut erreur.
+ * \return ESRV_SUCCESS status code: ok.
+ * \return ESRV_FAILURE status code: error.
  */
 ESRV_API int read_device_power(PESRV p, void *px, int vd) {
   PDEVICE_DATA pd = NULL;
   
   // Get back of the pol.py's data
-  FILE *pp = NULL;
-  char tampon[BUFFER_SIZE];
-  double puissance;
+  double power = 0;
   
   // px can be NULL if not required by device
   if(!p) { 
@@ -328,27 +327,12 @@ ESRV_API int read_device_power(PESRV p, void *px, int vd) {
    * (vd) can be any integer between 0 and the maximum virtual device number
    * provided in the init_device_extra_data function.  By default,
    * the max vd is equal to 0.  The power must be provided in Watts. */
-  
-  // Creation of the pol.py call command
-  sprintf(pd->commande,"sudo python %s/pol.py -w %s 2> /dev/null",pd->racinePython,pd->tabMAC[vd-1]);
-  
-  // Execution and write of the command in the pipe
-  pp = popen (pd->commande, "r");
-  if (pp == NULL){
-    perror ("popen error !");
-    exit(EXIT_FAILURE);
+  pd->plugwise->macaddress = pd->tabMAC[vd-1];
+  power = (double) getPowerInfo(pd->plugwise);
+  if (power <= MAX_POWER){
+    p->double_power = power;
+    printf("vd %d : %f power\n",vd,power);
   }
-  
-  // Ecriture du résultat de la commande dans le tampon via le "pipe"
-  fgets (tampon, sizeof (tampon), pp);
-  
-  pclose(pp);
-  tampon[strlen (tampon) - 1] = '\0';
-  puissance = atof(tampon);
-  if (puissance <= MAX_POWER)
-    p->double_power= (double) puissance;
-  printf("vd %d : %f watt\n",vd,puissance);
-  
   return(ESRV_SUCCESS);
  read_device_power_error:
   return(ESRV_FAILURE);
@@ -397,7 +381,7 @@ ESRV_API int read_device_energy(PESRV p, void *px, int vd, int s) {
  * --devices_options "config=<config's name> sampling_time=<time>" 
  */
 ESRV_API int parse_device_option_string(PESRV p, void *pd) {
-  
+  printf("parse1\n");
   // Link of the pointer pd with the static data structure
   PDEVICE_DATA px = NULL;  
   px = (p->device_data.p_device_data);
@@ -411,7 +395,6 @@ ESRV_API int parse_device_option_string(PESRV p, void *pd) {
   char *token_delimiter      = " ";
   char *sub_token_delimiter  = "=";
   
-  char buffer[BUFFER_SIZE] = "";
   // pd can be NULL if not required by device
   if(!p) { 
     goto parse_device_option_string_error;	
@@ -433,9 +416,9 @@ ESRV_API int parse_device_option_string(PESRV p, void *pd) {
   // there is the configuration name in sub_token
   
   printf("# number of configuration(s) : %d\n",px->nbConfigurations);
-  px->configurationChoisie = configuration_choice_parsing(px->nbConfigurations,sub_token,px->tabConfigurations);
-  printf("# choosen configuration : %d\n",px->configurationChoisie);  
-  
+  px->chosenConfiguration = configuration_choice_parsing(px->nbConfigurations,sub_token,px->tabConfigurations);
+  printf("# chosen configuration : %d\n",px->chosenConfiguration);  
+ 
   return(ESRV_SUCCESS);
  parse_device_option_string_error:
   return(ESRV_FAILURE);

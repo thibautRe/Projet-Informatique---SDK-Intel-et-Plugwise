@@ -5,9 +5,9 @@
 // headers inclusions
 //-----------------------------------------------------------------------------
 #include "pub_esrv.h"
-//#include "pub_esrv_counters.h"
 #include "configuration_management.h"
 #include "memory_allocation.h"
+#include "pol.h"
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -57,21 +57,21 @@ extern "C" {
     /* CONFIGURATION */
     int nbConfigurations;
     ConfigurationName *tabConfigurations;
-    int configurationChoisie;
+    int chosenConfiguration;
     int nb_circles;
-    char racineSDK[ROOT_SIZE];
     char racinePython[ROOT_SIZE];
     MACaddress *tabMAC;
     char **counters_names;
+    Plugwise *plugwise;
     
-    /* TEMPS D'EXECUTION DU PROGRAMME */
+    /* PROGRAM EXECUTION TIME */
     float nbrAnalysesParSecondes;
     
-    /* EXECUTION DE PROGRAMMES EXTERNES */
-    char commande[ORDER_SIZE]; // pour les commandes à lancer via system ou via popen
+    /* EXTERNS PROGRAMS EXECUTION TIME */
+    char commande[ORDER_SIZE]; // for orders to launch via system or via popen
     
     /* MENU */
-    int choixMenu;
+    int menuChoice;
     
   } DEVICE_DATA, *PDEVICE_DATA;
   

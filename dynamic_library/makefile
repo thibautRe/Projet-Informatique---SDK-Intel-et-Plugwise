@@ -7,12 +7,11 @@ BIN		= esrv_plugwise_driver.so
 EXEC		= configurations
 
 # Source files
-SRC		= $(wildcard ./src/*)
+SRC		= $(wildcard ./src/*.c)
 
 # Object files corresponding to source files
-OBJECTS		= $(subst .c,.o,$(subst ./src/,./obj/,$(SRC)))
-OBJECTS_BIN 	= $(OBJECTS)
-OBJECTS_EXEC 	= $(subst ./obj/esrv_plugwise_driver.o,,$(OBJECTS))
+OBJECTS_BIN	= $(subst .c,.o,$(subst ./src/,./obj/,$(SRC)))
+OBJECTS_EXEC 	= ./obj/configuration_management.o ./obj/configurations.o ./obj/memory_allocation.o
 
 # Root and include directories :
 IECSDK_ROOT 	= $(shell find /home/ -type d -name iecsdk 2> /dev/null | grep -v iecsdk/build/windows/iecsdk | grep -v Trash)
