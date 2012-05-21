@@ -88,23 +88,24 @@ void sendCommand(const char *code, char *macAd)
 
 char *getResult(Plugwise *pl, char *responsecode)
 {
-  int readbytes=0;
+  int readbytes = 0;
   int alreadyRead;
   char data[1024];
   int readReturn;
   
   if (responsecode == POWERINFORESPONSECODE)
-    readbytes=37;
+    readbytes = 37;
   else if (responsecode=="0000")
-    readbytes=0;
+    readbytes = 0;
   
   alreadyRead = 0;
   memset(data, '\0', sizeof(data));
   do{
-
-    do{
+    readReturn = -1;
+    while (readReturn == -1){
+      // or do{}while (readReturn != 1) ?;
       readReturn = read(fd, data + alreadyRead, 1);
-    }while(readReturn != 1);
+    }
     
     alreadyRead++;
   }while(ends(data,responsecode));
