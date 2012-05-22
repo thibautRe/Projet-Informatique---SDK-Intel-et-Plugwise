@@ -329,7 +329,7 @@ ESRV_API int read_device_power(PESRV p, void *px, int vd) {
    * the max vd is equal to 0.  The power must be provided in Watts. */
   pd->plugwise->macaddress = pd->tabMAC[vd-1];
   power = (double) getPowerInfo(pd->plugwise);
-  if (power <= MAX_POWER){
+  if ((power <= MAX_POWER) && (power != 0.)){
     p->double_power = power;
     printf("vd %d : %f power\n",vd,power);
   }

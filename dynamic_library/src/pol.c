@@ -103,7 +103,6 @@ char *getResult(Plugwise *pl, char *responsecode)
   do{
     readReturn = -1;
     while (readReturn == -1){
-      // or do{}while (readReturn != 1) ?;
       readReturn = read(fd, data + alreadyRead, 1);
     }
     
