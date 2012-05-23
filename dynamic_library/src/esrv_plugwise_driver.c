@@ -7,7 +7,7 @@
  * \date May 17th 2012
  * 
  * This file will permit to create a dynamic library for the ESRV.
- * It library gives to ESRV the ability to send and receive information from the "stick".
+ * Its library gives to ESRV the ability to send and receive information from the "stick".
  *
  * Function call sequence by the server :
  * <ol>
@@ -46,7 +46,7 @@
 /** 
  * \fn init_device_extra_data(PESRV p)
  * \brief initialize the device's extra data set.
- * \param[in,out] PESRV Pointeur vers une structure de données esrv.
+ * \param[in,out] PESRV Pointer to an esrv data structure.
  * \return ESRV_SUCCESS status code: ok.
  * \return ESRV_FAILURE status code: erreur.
  */
@@ -88,10 +88,9 @@ ESRV_API int init_device_extra_data(PESRV p) {
     px->tabConfigurations               = NULL;
     px->chosenConfiguration            = 0;
     px->nb_circles                      = 0;
-    // racine SDK ne sert à rien : A SUPPRIMER !
     // px->racineSDK                       = "";
     px->tabMAC                          = NULL;
-    px->counters_names                  = NULL; // Le nom de chaque compteurs est stocké dans un tableau de chaine de caractères 
+    px->counters_names                  = NULL; // The name of each counter is stored in an array of strings
     
     Plugwise initPlugwise   = {"Mac address"};
     Plugwise *pInitPlugwise = &initPlugwise; 
@@ -100,7 +99,6 @@ ESRV_API int init_device_extra_data(PESRV p) {
     /* PROGRAM EXECUTION TIME */
     px->nbrAnalysesParSecondes          = 0.0 ;   
     
-    // exécution de programmes externe : A SUPPRIMER !
     // sprintf(px->commande,"");
     
     /* MENU */
@@ -192,7 +190,7 @@ ESRV_API int init_device_extra_data(PESRV p) {
 /**
  * \fn delete_device_extra_data(PESRV p)
  * \brief free the device's dynamically allocated data
- * \param[in] Pointeur vers une structure de données ESRV
+ * \param[in] Pointer to an esrv data structure
  * \return ESRV_SUCCESS status code: ok.
  * \return ESRV_FAILURE status code: ok.
  *
